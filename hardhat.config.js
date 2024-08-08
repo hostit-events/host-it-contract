@@ -1,6 +1,8 @@
 
 /* global ethers task */
 require('@nomiclabs/hardhat-waffle')
+/* hardhat-foundry */
+require("@nomicfoundation/hardhat-foundry");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
