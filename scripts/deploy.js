@@ -13,18 +13,20 @@ async function deployDiamond () {
   await diamondCutFacet.deployed()
   console.log('DiamondCutFacet deployed:', diamondCutFacet.address)
 
-  // initFacetCut
+  // initFacetCut and DiamondArgs
   const initCut = []
 
   initCut.push({
     facetAddress: diamondCutFacet.address,
     action: FacetCutAction.Add,
-    functionSelectors: getSelectors
+    functionSelectors: getSelectors(diamondCutFacet)
   })
+
+  const DiamondArgs = {address: 0, bytes: ""}
 
   // deploy Diamond
   const Diamond = await ethers.getContractFactory('Diamond')
-  const diamond = await Diamond.deploy(contractOwner.address, diamondCutFacet.address)
+  const diamond = await Diamond.deploy(contractOwner, initCut, DiamondArgs)
   await diamond.deployed()
   console.log('Diamond deployed:', diamond.address)
 
