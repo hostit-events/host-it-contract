@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.0;
 
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 
-import {Diamond} from "../../contracts/Diamond.sol";
+import {Diamond, DiamondArgs} from "../../contracts/Diamond.sol";
 import {DiamondInit} from "../../contracts/upgradeInitializers/DiamondInit.sol";
 
 import {DiamondCutFacet} from "../../contracts/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../../contracts/facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "../../contracts/facets/OwnershipFacet.sol";
 
-import {IDiamondCut} from "../../contracts/interfaces/IDiamondCut.sol";
+import {IDiamondCut, FacetCut, FacetCutAction} from "../../contracts/interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "../../contracts/interfaces/IDiamondLoupe.sol";
 import {IERC165} from "../../contracts/interfaces/IERC165.sol";
 import {IERC173} from "../../contracts/interfaces/IERC173.sol";
 
 import {Test1Facet} from "../../contracts/facets/Test1Facet.sol";
-import {Test2Facet} from "../../contracts/facets/Test2Facet.sol";
 // import {FacetWithAppStorage} from "../../contracts/facets/FacetWithAppStorage.sol";
 // import {FacetWithAppStorage2, ExampleEnum} from "../../contracts/facets/FacetWithAppStorage2.sol";
 
@@ -52,16 +51,19 @@ contract DiamondUnitTest is Test {
     address[] facetAddressList;
 
     function setUp() public {
-
         // Deploy core diamond template contracts
         diamondInit = new DiamondInit();
         diamondCutFacet = new DiamondCutFacet();
         diamondLoupeFacet = new DiamondLoupeFacet();
         ownershipFacet = new OwnershipFacet();
-        diamond = new Diamond(diamondOwner, address(diamondCutFacet));
+
+        DiamondArgs memory args = DiamondArgs({
+            init: address(diamondInit),
+            initCalldata: abi.encodeWithSignature("init()")
+        });
         
         // Create the `cuts` array. (Already cut DiamondCut during diamond deployment)
-        IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](2);
+        FacetCut[] memory cuts = new FacetCut[](2);
 
         // Get function selectors for facets for `cuts` array.
         bytes4[] memory loupeSelectors = new bytes4[](5);
@@ -76,17 +78,19 @@ contract DiamondUnitTest is Test {
         ownershipSelectors[1] = IERC173.transferOwnership.selector;
 
         // Populate the `cuts` array with the needed data.
-        cuts[0] = IDiamondCut.FacetCut({
+        cuts[0] = FacetCut({
             facetAddress: address(diamondLoupeFacet),
-            action: IDiamondCut.FacetCutAction.Add,
+            action: FacetCutAction.Add,
             functionSelectors: loupeSelectors
         });
 
-        cuts[1] = IDiamondCut.FacetCut({
+        cuts[1] = FacetCut({
             facetAddress: address(ownershipFacet),
-            action: IDiamondCut.FacetCutAction.Add,
+            action: FacetCutAction.Add,
             functionSelectors: ownershipSelectors
         });
+
+        diamond = new Diamond(cuts, args);
 
         // Upgrade our diamond with the remaining facets by making the cuts. Must be owner!
         vm.prank(diamondOwner);
@@ -160,11 +164,11 @@ contract DiamondUnitTest is Test {
         exampleSelectors[4] = Test1Facet.test1Func5.selector;
 
         // Make the cut
-        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
+        FacetCut[] memory cut = new FacetCut[](1);
 
-        cut[0] = IDiamondCut.FacetCut({
+        cut[0] = FacetCut({
             facetAddress: address(test1Facet),
-            action: IDiamondCut.FacetCutAction.Add,
+            action: FacetCutAction.Add,
             functionSelectors: exampleSelectors
         });
 
@@ -206,11 +210,11 @@ contract DiamondUnitTest is Test {
         selectorToReplace[0] = Test1Facet.test1Func1.selector;
 
         // Make the cut
-        IDiamondCut.FacetCut[] memory replaceCut = new IDiamondCut.FacetCut[](1);
+        FacetCut[] memory replaceCut = new FacetCut[](1);
 
-        replaceCut[0] = IDiamondCut.FacetCut({
+        replaceCut[0] = FacetCut({
             facetAddress: address(ownershipFacet),
-            action: IDiamondCut.FacetCutAction.Replace,
+            action: FacetCutAction.Replace,
             functionSelectors: selectorToReplace
         });
 
@@ -236,11 +240,11 @@ contract DiamondUnitTest is Test {
         selectorsToRemove[1] = Test1Facet.test1Func3.selector;
 
         // Make the cut
-        IDiamondCut.FacetCut[] memory removeCut = new IDiamondCut.FacetCut[](1);
+        FacetCut[] memory removeCut = new FacetCut[](1);
 
-        removeCut[0] = IDiamondCut.FacetCut({
+        removeCut[0] = FacetCut({
             facetAddress: address(0),
-            action: IDiamondCut.FacetCutAction.Remove,
+            action: FacetCutAction.Remove,
             functionSelectors: selectorsToRemove
         });
 
@@ -267,7 +271,7 @@ contract DiamondUnitTest is Test {
         
     //     erc20Facet = new ERC20Facet();
 
-    //     IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
+    //     FacetCut[] memory cut = new FacetCut[](1);
 
     //     bytes4[] memory selectors = new bytes4[](11);
     //     selectors[0] = IERC20Facet.initialize.selector; 
@@ -282,9 +286,9 @@ contract DiamondUnitTest is Test {
     //     selectors[9] = IERC20Facet.mint.selector;
     //     selectors[10] = IERC20Facet.totalSupply.selector;
 
-    //     cut[0] = IDiamondCut.FacetCut({
+    //     cut[0] = FacetCut({
     //         facetAddress: address(erc20Facet),
-    //         action: IDiamondCut.FacetCutAction.Add,
+    //         action: FacetCutAction.Add,
     //         functionSelectors: selectors
     //     });
 
@@ -360,7 +364,7 @@ contract DiamondUnitTest is Test {
         
     //     erc1155Facet = new ERC1155Facet();
 
-    //     IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
+    //     FacetCut[] memory cut = new FacetCut[](1);
 
     //     bytes4[] memory selectors = new bytes4[](12);
     //     selectors[0] = IERC1155Facet.initialize.selector; 
@@ -376,9 +380,9 @@ contract DiamondUnitTest is Test {
     //     selectors[10] = IERC1155Facet.safeTransferFrom.selector;
     //     selectors[11] = IERC1155Facet.safeBatchTransferFrom.selector;
 
-    //     cut[0] = IDiamondCut.FacetCut({
+    //     cut[0] = FacetCut({
     //         facetAddress: address(erc1155Facet),
-    //         action: IDiamondCut.FacetCutAction.Add,
+    //         action: FacetCutAction.Add,
     //         functionSelectors: selectors
     //     });
 
@@ -453,7 +457,7 @@ contract DiamondUnitTest is Test {
     //     // Forcing the AppStorage to always be at slot 0 of a contract.
     //     facetWithAppStorage2 = new FacetWithAppStorage2();
 
-    //     IDiamondCut.FacetCut[] memory cut2 = new IDiamondCut.FacetCut[](1);
+    //     FacetCut[] memory cut2 = new FacetCut[](1);
 
     //     bytes4[] memory selector = new bytes4[](6);
     //     selector[0] = FacetWithAppStorage2.getFirstVar.selector;
@@ -463,9 +467,9 @@ contract DiamondUnitTest is Test {
     //     selector[4] = FacetWithAppStorage2.viewUnprotectedNestedStruct.selector; 
     //     selector[5] = FacetWithAppStorage2.getNumber.selector; 
 
-    //     cut2[0] = IDiamondCut.FacetCut({
+    //     cut2[0] = FacetCut({
     //         facetAddress: address(facetWithAppStorage2),
-    //         action: IDiamondCut.FacetCutAction.Add,
+    //         action: FacetCutAction.Add,
     //         functionSelectors: selector
     //     });
 
