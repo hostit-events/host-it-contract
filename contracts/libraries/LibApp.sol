@@ -41,6 +41,8 @@ library LibApp {
         mapping(address => bool) attended;
         // Array of attendees.
         address[] attendees;
+        // W3LC3 URI
+        string _uri;
     }
 
     struct TokenApprovalRef {

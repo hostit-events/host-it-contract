@@ -179,6 +179,11 @@ contract W3LC3 is IERC721A {
     //                       W3LC3 FUNCTIONS
     // =============================================================
 
+    function setBaseURI(string memory uri) external {
+        LibApp.AppStorage storage s = LibApp.appStorage();
+        s._uri = uri;
+    }
+
     function mintSingle(address to) external {
         _mint(to, 1);
     }
@@ -246,7 +251,7 @@ contract W3LC3 is IERC721A {
     /**
      * @dev Returns the next token ID to be minted.
      */
-    function nextTokenId() external view returns (uint256) {
+    function viewNextTokenId() external view returns (uint256) {
         return _nextTokenId();
     }
 
@@ -414,7 +419,8 @@ contract W3LC3 is IERC721A {
      * by default, it can be overridden in child contracts.
      */
     function _baseURI() internal view virtual returns (string memory) {
-        return "";
+        LibApp.AppStorage storage s = LibApp.appStorage();
+        return s._uri;
     }
 
     // =============================================================
