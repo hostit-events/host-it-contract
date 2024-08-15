@@ -1,13 +1,36 @@
 /* global ethers */
 /* eslint prefer-const: "off" */
 
-const { getSelectors, FacetCutAction } = require('./libraries/diamond.js');
-const { ethers } = require("hardhat");
-const fs = require("fs");
+const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
+const { getSelectors, FacetCutAction } = require('../../scripts/libraries/diamond.js')
 
-async function deployDiamond() {
+module.exports = buildModule("deploy", (m) => {
   const contractOwner = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80").address;
   const zeroAddress = "0x0000000000000000000000000000000000000000";
+
+  const diamondCutFacet = m.contract("DiamondCutFacet");
+
+  // initFacetCut and DiamondArgs
+  const initCut = []
+
+  initCut.push({
+    facetAddress: diamondCutFacet.address,
+    action: FacetCutAction.Add,
+    functionSelectors: getSelectors(diamondCutFacet)
+  })
+
+  const DiamondArgs = { address: zeroAddress, bytes: "" }
+
+  const diamond = m.contract("Diamond", [contractOwner, initCut, DiamondArgs]);
+
+  // m.call(diamond, "launch", []);
+
+  return { diamond };
+});
+
+async function deployDiamond() {
+  const accounts = await ethers.getSigners()
+  const contractOwner = accounts[0]
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory('DiamondCutFacet')
@@ -24,7 +47,7 @@ async function deployDiamond() {
     functionSelectors: getSelectors(diamondCutFacet)
   })
 
-  const DiamondArgs = { address: zeroAddress, bytes: "" }
+  const DiamondArgs = { address: 0, bytes: "" }
 
   // deploy Diamond
   const Diamond = await ethers.getContractFactory('Diamond')
@@ -45,8 +68,7 @@ async function deployDiamond() {
   console.log('Deploying facets')
   const FacetNames = [
     'DiamondLoupeFacet',
-    'OwnershipFacet',
-    'AccessControlFacet'
+    'OwnershipFacet'
   ]
   const cut = []
   for (const FacetName of FacetNames) {

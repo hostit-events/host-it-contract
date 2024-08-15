@@ -71,7 +71,7 @@ pragma solidity ^0.8.4;
 
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 import {LibApp} from "../libraries/LibApp.sol";
-import {IERC721A} from "../interfaces/IERC721A.sol";
+import {IW3LC3__ERC721A} from "../interfaces/IW3LC3__ERC721A.sol";
 
 /**
  * @dev Interface of ERC721 token receiver.
@@ -108,7 +108,7 @@ error W3LC24_AttendeeDoesNotHaveATicket();
  * - An owner cannot have more than 2**64 - 1 (max value of uint64) of supply.
  * - The maximum token ID cannot exceed 2**256 - 1 (max value of uint256).
  */
-contract W3LC3 is IERC721A {
+contract W3LC3__ERC721A is IW3LC3__ERC721A {
     // =============================================================
     //                           CONSTANTS
     // =============================================================
@@ -179,43 +179,50 @@ contract W3LC3 is IERC721A {
     //                       W3LC3 FUNCTIONS
     // =============================================================
 
-    function setBaseURI(string memory uri) external {
+    function w3lc3__setBaseURI(string memory uri) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
         s._uri = uri;
     }
 
-    function mintSingle(address to) external {
+    function w3lc3__mintSingle(address to) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         _mint(to, 1);
     }
 
-    function mintMultipe(address to, uint256 quantity) external {
+    function w3lc3__mintMultipe(address to, uint256 quantity) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         _mint(to, quantity);
     }
 
-    function batchMint(address[] calldata to) external {
+    function w3lc3__batchMint(address[] calldata to) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         for (uint256 i; i < to.length; i++) {
             _mint(to[i], 1);
         }
     }
 
-    function batchTransfer(address[] calldata tos) external {
+    function w3lc3__batchTransfer(address[] calldata tos) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         for (uint256 i; i < tos.length; i++) {
-            transferFrom(_msgSenderERC721A(), tos[i], i + 1);
+            w3lc3__transferFrom(_msgSenderERC721A(), tos[i], i + 1);
         }
     }
 
-    function batchTransfer(address[] calldata tos, uint256[] calldata tokenIds) external {
+    function w3lc3__batchTransfer(address[] calldata tos, uint256[] calldata tokenIds) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         for (uint256 i; i < tos.length; i++) {
-            transferFrom(_msgSenderERC721A(), tos[i], tokenIds[i]);
+            w3lc3__transferFrom(_msgSenderERC721A(), tos[i], tokenIds[i]);
         }
     }
 
-    function verifyAttendance(address attendee) external {
+    function w3lc3__verifyAttendance(address attendee) external {
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
         if (s.attended[attendee] == true) revert W3LC24_AlreadyAttended();
 
-        if (balanceOf(attendee) == 0) revert W3LC24_AttendeeDoesNotHaveATicket();
+        if (w3lc3__balanceOf(attendee) == 0) revert W3LC24_AttendeeDoesNotHaveATicket();
 
         s.attended[attendee] = true;
         s.attendees.push(attendee);
@@ -268,7 +275,7 @@ contract W3LC3 is IERC721A {
      * Burned tokens will reduce the count.
      * To get the total number of tokens minted, please see {_totalMinted}.
      */
-    function totalSupply() public view virtual override returns (uint256 result) {
+    function w3lc3__totalSupply() public view virtual override returns (uint256 result) {
         LibApp.AppStorage storage s = LibApp.appStorage();
         // Counter underflow is impossible as `_burnCounter` cannot be incremented
         // more than `_currentIndex + _spotMinted - _startTokenId()` times.
@@ -316,7 +323,7 @@ contract W3LC3 is IERC721A {
     /**
      * @dev Returns the number of tokens in `owner`'s account.
      */
-    function balanceOf(address owner) public view virtual override returns (uint256) {
+    function w3lc3__balanceOf(address owner) public view virtual override returns (uint256) {
         LibApp.AppStorage storage s = LibApp.appStorage();
         if (owner == address(0)) _revert(BalanceQueryForZeroAddress.selector);
         return s._packedAddressData[owner] & _BITMASK_ADDRESS_DATA_ENTRY;
@@ -392,21 +399,21 @@ contract W3LC3 is IERC721A {
     /**
      * @dev Returns the token collection name.
      */
-    function name() public view virtual override returns (string memory) {
+    function w3lc3__name() public view virtual override returns (string memory) {
         return _name;
     }
 
     /**
      * @dev Returns the token collection symbol.
      */
-    function symbol() public view virtual override returns (string memory) {
+    function w3lc3__symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
 
     /**
      * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
      */
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function w3lc3__tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
 
         string memory baseURI = _baseURI();
@@ -434,7 +441,7 @@ contract W3LC3 is IERC721A {
      *
      * - `tokenId` must exist.
      */
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
+    function w3lc3__ownerOf(uint256 tokenId) public view virtual override returns (address) {
         return address(uint160(_packedOwnershipOf(tokenId)));
     }
 
@@ -563,7 +570,7 @@ contract W3LC3 is IERC721A {
      *
      * - The caller must own the token or be an approved operator.
      */
-    function approve(address to, uint256 tokenId) public payable virtual override {
+    function w3lc3__approve(address to, uint256 tokenId) public payable virtual override {
         _approve(to, tokenId, true);
     }
 
@@ -574,7 +581,7 @@ contract W3LC3 is IERC721A {
      *
      * - `tokenId` must exist.
      */
-    function getApproved(uint256 tokenId) public view virtual override returns (address) {
+    function w3lc3__getApproved(uint256 tokenId) public view virtual override returns (address) {
         LibApp.AppStorage storage s = LibApp.appStorage();
         if (!_exists(tokenId)) _revert(ApprovalQueryForNonexistentToken.selector);
 
@@ -592,7 +599,7 @@ contract W3LC3 is IERC721A {
      *
      * Emits an {ApprovalForAll} event.
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override {
+    function w3lc3__setApprovalForAll(address operator, bool approved) public virtual override {
         LibApp.AppStorage storage s = LibApp.appStorage();
         s._operatorApprovals[_msgSenderERC721A()][operator] = approved;
         emit ApprovalForAll(_msgSenderERC721A(), operator, approved);
@@ -603,7 +610,7 @@ contract W3LC3 is IERC721A {
      *
      * See {setApprovalForAll}.
      */
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+    function w3lc3__isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
         LibApp.AppStorage storage s = LibApp.appStorage();
         return s._operatorApprovals[owner][operator];
     }
@@ -683,7 +690,7 @@ contract W3LC3 is IERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address from, address to, uint256 tokenId) public payable virtual override {
+    function w3lc3__transferFrom(address from, address to, uint256 tokenId) public payable virtual override {
         LibApp.AppStorage storage s = LibApp.appStorage();
         uint256 prevOwnershipPacked = _packedOwnershipOf(tokenId);
 
@@ -696,7 +703,7 @@ contract W3LC3 is IERC721A {
 
         // The nested ifs save around 20+ gas over a compound boolean condition.
         if (!_isSenderApprovedOrOwner(approvedAddress, from, _msgSenderERC721A()))
-            if (!isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
+            if (!w3lc3__isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
 
         _beforeTokenTransfers(from, to, tokenId, 1);
 
@@ -758,8 +765,8 @@ contract W3LC3 is IERC721A {
     /**
      * @dev Equivalent to `safeTransferFrom(from, to, tokenId, '')`.
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override {
-        safeTransferFrom(from, to, tokenId, "");
+    function w3lc3__safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override {
+        w3lc3__safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
@@ -777,8 +784,8 @@ contract W3LC3 is IERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override {
-        transferFrom(from, to, tokenId);
+    function w3lc3__safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override {
+        w3lc3__transferFrom(from, to, tokenId);
         if (to.code.length != 0)
             if (!_checkContractOnERC721Received(from, to, tokenId, _data)) {
                 _revert(TransferToNonERC721ReceiverImplementer.selector);
@@ -1136,10 +1143,10 @@ contract W3LC3 is IERC721A {
      */
     function _approve(address to, uint256 tokenId, bool approvalCheck) internal virtual {
         LibApp.AppStorage storage s = LibApp.appStorage();
-        address owner = ownerOf(tokenId);
+        address owner = w3lc3__ownerOf(tokenId);
 
         if (approvalCheck && _msgSenderERC721A() != owner)
-            if (!isApprovedForAll(owner, _msgSenderERC721A())) {
+            if (!w3lc3__isApprovedForAll(owner, _msgSenderERC721A())) {
                 _revert(ApprovalCallerNotOwnerNorApproved.selector);
             }
 
@@ -1179,7 +1186,7 @@ contract W3LC3 is IERC721A {
         if (approvalCheck) {
             // The nested ifs save around 20+ gas over a compound boolean condition.
             if (!_isSenderApprovedOrOwner(approvedAddress, from, _msgSenderERC721A()))
-                if (!isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
+                if (!w3lc3__isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
         }
 
         _beforeTokenTransfers(from, address(0), tokenId, 1);

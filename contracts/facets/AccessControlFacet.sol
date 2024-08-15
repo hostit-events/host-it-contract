@@ -47,7 +47,6 @@ import {IERC165} from "../interfaces/IERC165.sol";
  * to enforce additional security measures for this role.
  */
 contract AccessControlFacet is IAccessControl, IERC165 {
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     /**
      * @dev Modifier that checks that an account has a specific role. Reverts
@@ -157,6 +156,15 @@ contract AccessControlFacet is IAccessControl, IERC165 {
         }
 
         _revokeRole(role, callerConfirmation);
+    }
+
+    /**
+     * @dev Sets `adminRole` as ``role``'s admin role.
+     *
+     * Emits a {RoleAdminChanged} event.
+     */
+    function setRoleAdmin(bytes32 role, bytes32 adminRole) public virtual onlyRole(getRoleAdmin(role)) {
+        _setRoleAdmin(role, adminRole);
     }
 
     /**

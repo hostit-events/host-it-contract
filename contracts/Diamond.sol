@@ -23,8 +23,11 @@ struct DiamondArgs {
 }
 
 contract Diamond {
+    bytes32 constant DIAMOND_ADMIN_ROLE = 0x00;
+
     constructor(address _contractOwner, FacetCut[] memory _diamondCut, DiamondArgs memory _args) payable {
-        LibDiamond.setContractOwner(_contractOwner);
+        // LibDiamond.setContractOwner(_contractOwner);
+        LibDiamond._grantRole(DIAMOND_ADMIN_ROLE, _contractOwner);
 
         // Add the diamondCut external function from the diamondCutFacet
         LibDiamond.diamondCut(_diamondCut, _args.init, _args.initCalldata);
