@@ -19,13 +19,15 @@ import {IW3LC3__ERC721A} from "../contracts/interfaces/IW3LC3__ERC721A.sol";
 import {IERC165} from "../contracts/interfaces/IERC165.sol";
 import {IERC173} from "../contracts/interfaces/IERC173.sol";
 
+import {LibDiamond} from "../contracts/libraries/LibDiamond.sol";
+
 import {Diamond, DiamondArgs} from "../contracts/Diamond.sol";
 
 contract DeployScript is Script {
     // Store the FacetCut struct for each facet that is being deployed.
     // NOTE: using storage array to easily "push" new FacetCut as we
     // process the facets.
-    FacetCut[] private _facetCuts;
+    // FacetCut[] private _facetCuts;
 
     function run() external {
         // uint256 privateKey = vm.envUint("PRIVATE_KEY");
@@ -35,16 +37,16 @@ contract DeployScript is Script {
         DiamondInit diamondInit = new DiamondInit();
         DiamondCutFacet diamondCutFacet = new DiamondCutFacet();
         DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
-        // OwnershipFacet ownershipFacet = new OwnershipFacet();
+        OwnershipFacet ownershipFacet = new OwnershipFacet();
         AccessControlFacet accessControlFacet = new AccessControlFacet();
         W3LC3__ERC721A w3lc3 = new W3LC3__ERC721A();
 
         FacetCut[] memory initCut = new FacetCut[](1);
 
-        bytes4[] memory cutSelectors = new bytes4[](1);
-        cutSelectors[0] = IDiamondCut.diamondCut.selector;
+        bytes4[] memory initCutSelectors = new bytes4[](1);
+        initCutSelectors[0] = IDiamondCut.diamondCut.selector;
 
-        initCut[0] = FacetCut({facetAddress: address(diamondCutFacet), action: FacetCutAction.Add, functionSelectors: cutSelectors});
+        initCut[0] = FacetCut({facetAddress: address(diamondCutFacet), action: FacetCutAction.Add, functionSelectors: initCutSelectors});
 
         // Build the DiamondArgs.
         DiamondArgs memory initDiamondArgs = DiamondArgs({
@@ -54,12 +56,13 @@ contract DeployScript is Script {
         });
 
         // Deploy the diamond.
-        // console.log("Message sender", msg.sender);
+        console.log("Message sender", msg.sender);
         Diamond diamond = new Diamond(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, initCut, initDiamondArgs);
         console.log("Diamond address: ", address(diamond));
+        console.log("DiamondInit address: ", address(diamondInit));
 
         // Create the `cuts` array. (Already cut DiamondCut during diamond deployment)
-        FacetCut[] memory cuts = new FacetCut[](3);
+        FacetCut[] memory cuts = new FacetCut[](2);
 
         // Get function selectors for facets for `cuts` array.
         bytes4[] memory loupeSelectors = new bytes4[](5);
@@ -69,9 +72,9 @@ contract DeployScript is Script {
         loupeSelectors[3] = IDiamondLoupe.facetAddress.selector;
         loupeSelectors[4] = IERC165.supportsInterface.selector;
 
-        // bytes4[] memory ownershipSelectors = new bytes4[](2);
-        // ownershipSelectors[0] = IERC173.owner.selector;
-        // ownershipSelectors[1] = IERC173.transferOwnership.selector;
+        bytes4[] memory ownershipSelectors = new bytes4[](2);
+        ownershipSelectors[0] = IERC173.owner.selector;
+        ownershipSelectors[1] = IERC173.transferOwnership.selector;
 
         bytes4[] memory accessControlSelectors = new bytes4[](6);
         accessControlSelectors[0] = IAccessControl.hasRole.selector;
@@ -81,28 +84,28 @@ contract DeployScript is Script {
         accessControlSelectors[4] = IAccessControl.renounceRole.selector;
         accessControlSelectors[5] = AccessControlFacet.setRoleAdmin.selector;
 
-        bytes4[] memory w3lc3Selectors = new bytes4[](21);
+        bytes4[] memory w3lc3Selectors = new bytes4[](19);
         w3lc3Selectors[0] = IW3LC3__ERC721A.w3lc3__totalSupply.selector;
         w3lc3Selectors[1] = IW3LC3__ERC721A.w3lc3__balanceOf.selector;
         w3lc3Selectors[2] = IW3LC3__ERC721A.w3lc3__ownerOf.selector;
-        w3lc3Selectors[3] = 0xf2e3b036; //w3lc3__safeTransferFrom
-        w3lc3Selectors[4] = 0x3a8acfd7; //w3lc3__safeTransferFrom
-        w3lc3Selectors[5] = IW3LC3__ERC721A.w3lc3__transferFrom.selector;
-        w3lc3Selectors[6] = IW3LC3__ERC721A.w3lc3__approve.selector;
-        w3lc3Selectors[7] = IW3LC3__ERC721A.w3lc3__setApprovalForAll.selector;
-        w3lc3Selectors[8] = IW3LC3__ERC721A.w3lc3__getApproved.selector;
-        w3lc3Selectors[9] = IW3LC3__ERC721A.w3lc3__isApprovedForAll.selector;
-        w3lc3Selectors[10] = IW3LC3__ERC721A.w3lc3__name.selector;
-        w3lc3Selectors[11] = IW3LC3__ERC721A.w3lc3__symbol.selector;
-        w3lc3Selectors[12] = IW3LC3__ERC721A.w3lc3__tokenURI.selector;
-        w3lc3Selectors[13] = W3LC3__ERC721A.w3lc3__setBaseURI.selector;
-        w3lc3Selectors[14] = W3LC3__ERC721A.w3lc3__mintSingle.selector;
-        w3lc3Selectors[15] = W3LC3__ERC721A.w3lc3__mintMultipe.selector;
-        w3lc3Selectors[16] = W3LC3__ERC721A.w3lc3__batchMint.selector;
-        w3lc3Selectors[17] = 0xe8f76096; //w3lc3__batchTransfer
-        w3lc3Selectors[18] = 0x25897632; //w3lc3__batchTransfer
-        w3lc3Selectors[19] = W3LC3__ERC721A.w3lc3__setBaseURI.selector;
-        w3lc3Selectors[20] = W3LC3__ERC721A.w3lc3__verifyAttendance.selector;
+        // w3lc3Selectors[3] = 0xf2e3b036; //w3lc3__safeTransferFrom
+        w3lc3Selectors[3] = 0x3a8acfd7; //w3lc3__safeTransferFrom
+        w3lc3Selectors[4] = IW3LC3__ERC721A.w3lc3__transferFrom.selector;
+        w3lc3Selectors[5] = IW3LC3__ERC721A.w3lc3__approve.selector;
+        w3lc3Selectors[6] = IW3LC3__ERC721A.w3lc3__setApprovalForAll.selector;
+        w3lc3Selectors[7] = IW3LC3__ERC721A.w3lc3__getApproved.selector;
+        w3lc3Selectors[8] = IW3LC3__ERC721A.w3lc3__isApprovedForAll.selector;
+        w3lc3Selectors[9] = IW3LC3__ERC721A.w3lc3__name.selector;
+        w3lc3Selectors[10] = IW3LC3__ERC721A.w3lc3__symbol.selector;
+        w3lc3Selectors[11] = IW3LC3__ERC721A.w3lc3__tokenURI.selector;
+        w3lc3Selectors[12] = W3LC3__ERC721A.w3lc3__setBaseURI.selector;
+        w3lc3Selectors[13] = W3LC3__ERC721A.w3lc3__mintSingle.selector;
+        w3lc3Selectors[14] = W3LC3__ERC721A.w3lc3__mintMultipe.selector;
+        w3lc3Selectors[15] = W3LC3__ERC721A.w3lc3__batchMint.selector;
+        // w3lc3Selectors[17] = 0xe8f76096; //w3lc3__batchTransfer
+        w3lc3Selectors[16] = 0x25897632; //w3lc3__batchTransfer
+        w3lc3Selectors[17] = W3LC3__ERC721A.w3lc3__setBaseURI.selector;
+        w3lc3Selectors[18] = W3LC3__ERC721A.w3lc3__verifyAttendance.selector;
 
         // Populate the `cuts` array with the needed data.
         cuts[0] = FacetCut({facetAddress: address(diamondLoupeFacet), action: FacetCutAction.Add, functionSelectors: loupeSelectors});
@@ -111,12 +114,12 @@ contract DeployScript is Script {
 
         cuts[1] = FacetCut({facetAddress: address(accessControlFacet), action: FacetCutAction.Add, functionSelectors: accessControlSelectors});
 
-        cuts[2] = FacetCut({facetAddress: address(w3lc3), action: FacetCutAction.Add, functionSelectors: w3lc3Selectors});
+        // cuts[3] = FacetCut({facetAddress: address(w3lc3), action: FacetCutAction.Add, functionSelectors: w3lc3Selectors});
 
         // Upgrade our diamond with the remaining facets by making the cuts. Must be owner!
         IDiamondCut(address(diamond)).diamondCut(cuts, address(diamondInit), abi.encodeWithSignature("init()"));
 
-        console.log("Diamond cuts complete. Owner of Diamond:", IERC173(address(diamond)).owner());
+        // console.log("Diamond cuts complete. Owner of Diamond:", IAccessControl(address(diamond)).getRoleAdmin(LibDiamond.DIAMOND_ADMIN_ROLE));
 
         vm.stopBroadcast();
     }

@@ -170,9 +170,18 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
 
     constructor() {
         LibApp.AppStorage storage s = LibApp.appStorage();
+
+        LibDiamond._grantRole(LibDiamond.DIAMOND_ADMIN_ROLE, msg.sender);
+        LibDiamond._grantRole(LibDiamond.W3LC3_ADMIN_ROLE, msg.sender);
         s._currentIndex = _startTokenId();
 
         if (_sequentialUpTo() < _startTokenId()) _revert(SequentialUpToTooSmall.selector);
+    }
+
+    function SetW3LC3Admin(address _admin) external{
+        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
+
+        LibDiamond._grantRole(LibDiamond.W3LC3_ADMIN_ROLE, _admin);
     }
 
     // =============================================================

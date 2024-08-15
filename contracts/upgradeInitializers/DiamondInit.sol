@@ -33,7 +33,7 @@ contract DiamondInit is IDiamondInit {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IAccessControl).interfaceId] = true;
         ds.supportedInterfaces[type(IW3LC3__ERC721A).interfaceId] = true;
-        ds.supportedInterfaces[type(IERC173).interfaceId] = true;
+        // ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
         // add your own state variables 
         // EIP-2535 specifies that the `diamondCut` function takes two optional 
