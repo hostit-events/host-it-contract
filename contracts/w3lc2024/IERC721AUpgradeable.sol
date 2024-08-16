@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 // ERC721A Contracts v4.3.0
-/// @author HostIT (David Dada, Manoah Luka, Olorunsogo Banwo, and Oluwakemi Atoyebi)
-/// @author Modified from Chiru Labs 
+// Creator: Chiru Labs
 
 pragma solidity ^0.8.4;
 
 /**
  * @dev Interface of ERC721A.
  */
-interface IW3LC3__ERC721A {
+interface IERC721AUpgradeable {
     /**
      * The caller must own the token or be an approved operator.
      */
@@ -124,7 +123,7 @@ interface IW3LC3__ERC721A {
      * Burned tokens will reduce the count.
      * To get the total number of tokens minted, please see {_totalMinted}.
      */
-    function w3lc3__totalSupply() external view returns (uint256);
+    function totalSupply() external view returns (uint256);
 
     // =============================================================
     //                            IERC165
@@ -163,7 +162,7 @@ interface IW3LC3__ERC721A {
     /**
      * @dev Returns the number of tokens in `owner`'s account.
      */
-    function w3lc3__balanceOf(address owner) external view returns (uint256 balance);
+    function balanceOf(address owner) external view returns (uint256 balance);
 
     /**
      * @dev Returns the owner of the `tokenId` token.
@@ -172,7 +171,7 @@ interface IW3LC3__ERC721A {
      *
      * - `tokenId` must exist.
      */
-    function w3lc3__ownerOf(uint256 tokenId) external view returns (address owner);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
 
     /**
      * @dev Safely transfers `tokenId` token from `from` to `to`,
@@ -191,7 +190,7 @@ interface IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function w3lc3__safeTransferFrom(
+    function safeTransferFrom(
         address from,
         address to,
         uint256 tokenId,
@@ -201,7 +200,7 @@ interface IW3LC3__ERC721A {
     /**
      * @dev Equivalent to `safeTransferFrom(from, to, tokenId, '')`.
      */
-    function w3lc3__safeTransferFrom(
+    function safeTransferFrom(
         address from,
         address to,
         uint256 tokenId
@@ -223,7 +222,7 @@ interface IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function w3lc3__transferFrom(
+    function transferFrom(
         address from,
         address to,
         uint256 tokenId
@@ -243,7 +242,7 @@ interface IW3LC3__ERC721A {
      *
      * Emits an {Approval} event.
      */
-    function w3lc3__approve(address to, uint256 tokenId) external payable;
+    function approve(address to, uint256 tokenId) external payable;
 
     /**
      * @dev Approve or remove `operator` as an operator for the caller.
@@ -256,7 +255,7 @@ interface IW3LC3__ERC721A {
      *
      * Emits an {ApprovalForAll} event.
      */
-    function w3lc3__setApprovalForAll(address operator, bool _approved) external;
+    function setApprovalForAll(address operator, bool _approved) external;
 
     /**
      * @dev Returns the account approved for `tokenId` token.
@@ -265,14 +264,14 @@ interface IW3LC3__ERC721A {
      *
      * - `tokenId` must exist.
      */
-    function w3lc3__getApproved(uint256 tokenId) external view returns (address operator);
+    function getApproved(uint256 tokenId) external view returns (address operator);
 
     /**
      * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
      *
      * See {setApprovalForAll}.
      */
-    function w3lc3__isApprovedForAll(address owner, address operator) external view returns (bool);
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
 
     // =============================================================
     //                        IERC721Metadata
@@ -281,17 +280,17 @@ interface IW3LC3__ERC721A {
     /**
      * @dev Returns the token collection name.
      */
-    function w3lc3__name() external view returns (string memory);
+    function name() external view returns (string memory);
 
     /**
      * @dev Returns the token collection symbol.
      */
-    function w3lc3__symbol() external view returns (string memory);
+    function symbol() external view returns (string memory);
 
     /**
      * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
      */
-    function w3lc3__tokenURI(uint256 tokenId) external view returns (string memory);
+    function tokenURI(uint256 tokenId) external view returns (string memory);
 
     // =============================================================
     //                           IERC2309

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 
-import {Diamond, DiamondArgs} from "../../contracts/Diamond.sol";
+import {HostIT} from "../../contracts/HostIT.sol";
 import {DiamondInit} from "../../contracts/upgradeInitializers/DiamondInit.sol";
 
 import {DiamondCutFacet} from "../../contracts/facets/DiamondCutFacet.sol";
@@ -17,6 +17,8 @@ import {IDiamondLoupe} from "../../contracts/interfaces/IDiamondLoupe.sol";
 import {IAccessControl} from "../../contracts/interfaces/IAccessControl.sol";
 import {IERC165} from "../../contracts/interfaces/IERC165.sol";
 import {IERC173} from "../../contracts/interfaces/IERC173.sol";
+
+import {LibDiamond} from "../../contracts/libraries/LibDiamond.sol";
 
 // import {FacetWithAppStorage} from "../../contracts/facets/FacetWithAppStorage.sol";
 // import {FacetWithAppStorage2, ExampleEnum} from "../../contracts/facets/FacetWithAppStorage2.sol";

@@ -13,6 +13,14 @@ import {IAccessControl} from "../interfaces/IAccessControl.sol";
 
 error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
 
+// This is used in diamond constructor
+// more arguments are added to this struct
+// this avoids stack too deep errors
+struct DiamondArgs {
+    address init;
+    bytes initCalldata;
+}
+
 library LibDiamond {
     // 32 bytes keccak hash of a string to use as a diamond storage location.
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");

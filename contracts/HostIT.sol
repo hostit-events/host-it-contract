@@ -8,26 +8,16 @@ pragma solidity ^0.8.0;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import {LibDiamond} from "./libraries/LibDiamond.sol";
+import {LibDiamond, DiamondArgs} from "./libraries/LibDiamond.sol";
 import {FacetCut} from "./interfaces/IDiamondCut.sol";
 
 // When no function exists for function called
 error Diamond_FunctionNotFound(bytes4 _functionSelector);
 
-// This is used in diamond constructor
-// more arguments are added to this struct
-// this avoids stack too deep errors
-struct DiamondArgs {
-    address init;
-    bytes initCalldata;
-}
-
-contract Diamond {
-    bytes32 constant DIAMOND_ADMIN_ROLE = 0x00;
-
-    constructor(address _contractOwner, FacetCut[] memory _diamondCut, DiamondArgs memory _args) payable {
-        // LibDiamond.setContractOwner(_contractOwner);
-        LibDiamond._grantRole(DIAMOND_ADMIN_ROLE, _contractOwner);
+contract HostIT {
+    constructor(address _contractAdmin, FacetCut[] memory _diamondCut, DiamondArgs memory _args) payable {
+        // Grant `_contractAdmin` address the diamond admin role a.k.a default admin role
+        require(LibDiamond._grantRole(LibDiamond.DIAMOND_ADMIN_ROLE, _contractAdmin));
 
         // Add the diamondCut external function from the diamondCutFacet
         LibDiamond.diamondCut(_diamondCut, _args.init, _args.initCalldata);

@@ -1,97 +1,28 @@
 // SPDX-License-Identifier: MIT
 // ERC721A Contracts v4.3.0
-/// @author HostIT (David Dada, Manoah Luka, Olorunsogo Banwo, and Oluwakemi Atoyebi)
-/// @author Modified from Chiru Labs 
-//
-//                              :-------------------------------.                                               :=+
-//                           .*+:                              .-*=                                        -=+*+-#@%.
-//                          .*                                    -#-                               .-====-:    .@#%@+
-//                          --               ::::                  *@@=                        :-+++-.          #%##%@+
-//                          --              -@##%=                 *@%@.                 .:=**+-.      .-+#    -@###%@.
-//                          --               %###%                 *@#@-            -====-.      :=+*#@%%@*   .@@###@=
-//                          --               .%####                *%#@-           =#      .-+#@@%%#####%@.   *@###@%
-//                          --                .####%:              *%#@-           %    =%@@%#######%%@%@-   .@%###@-
-//                          --                  -*%#%*=:           *%#@-          *:   -@#####%%@%*+-: .#    *%###@%
-//                          --    :*+++++++++++++++#####%#*++      *%#@-         -*   .@@###@*=.       #.   :@%##%@:
-//                          --    -#########################%      *%#@-        .@.   %@###@=         :#    %@###@#
-//                          --    :*++++++++++++++*%####*+++=      *%#@-        %:   -@###@#      .:==#:   +@###%@.
-//                          --                  -#%%%*=.           *%#@-       ==   .@%##%@...-+++=:      :@@###@+
-//                          --                .####%-              *%#@-       %    %@#%%@%++-.      -=*%@%@@%#%@
-//                          --               .%###*                *%#@-     .%-   +%#*=:.    .:=*#%%%%#####%@@@+
-//                          --               %###%                 *%#@-     *+          :=*#@%%###########%%@@%
-//                          --              -@%#%=                 *%#@-    .#      :=*#@@%###########%%@##=-.
-//                          --              ....:                  *%#@-    #-:=*#%%%%##########%@%%*=-.
-//                          .#.                                   -@##@-   -@@%##########%%%@#*=:.
-//                           .*+:                              .:#@###@:    :@%#####%%@@#+-.
-//                              +@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%###%@+       +@@%*+-:
-//                                +#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#=.
-//
-//                                                                                         ..:----..
-//                                                     .-=+##*=.                      .=+++-:......--+++:
-//                                                  -#*+-.    :%*:                 .=+-                 :=+-
-//                                              .=*+-          .@@#-             :=-                       :=+.
-//                                            -#*:             -@%%@%.         :*-        ...       ..        +*.
-//                                          +%+                %@###@@        -*.       -%%%%.     +%#%*       :@*.
-//                                       .+#-                 *@####@@       =+         *%###%:   +%###%:       .@@+
-//                                      *#:                  =@%####@=      :+           =%###%. =###%#.         :@@#
-//                                    =%-                   +@%####@%       #.            .*####=%##%=            *@@%
-//                                  :#=.                   #@%####@@.       #       -+==----*%#####%=----==+.      @%@+
-//                                 +%:                   -@@#####@@:       =*      :@#######################@      @%%@
-//                               .#+                    *@%#####@%         :*       #@%###*+*#######++*###%%+      @##@:
-//                              :@=                   =%%#####%@*           #              :#####%#%*.             @##@-
-//                             :%.                  -@@######@%:            +-           .*%##%= ####%=            @%#@-
-//                             @:                 -%@%#####%@*               #          :%####+   #####*           @%#@-
-//                           .%=               .=%@%#####%@*:                :#:        *%##%+    .%###%:          @%#@-
-//                           +@              :*@%%######@%:                    *-        :=+-       ++=.           @%#@-
-//                           *=           .+%@%######%@%:                       -*:                                @%#@-
-//                           -@:      :-*@@%#######%@*:                           -+=.                             @%#@-
-//                            :#%#*%%@@%########%@#=                                .+%*-.                         @%#@-
-//                              :#@%########%%@%+:                                    :+@@@%#*++++++++++++++++++++*@%#@-
-//                                .*@@%%@@@#+-.                                          :=*%@@@%%%%%%%%%%%%%%%%%%%%@@@-
-//                                   ....                                                      .:----------------------.
-//
-//
-//                                             _      __        __    ____   __
-//                                            | | /| / / ___   / /   |_  /  / /  ___ _  ___ _ ___   ___
-//                                            | |/ |/ / / -_) / _ \ _/_ <  / /__/ _ `/ / _ `// _ \ (_-<
-//                                            |__/|__/  \__/ /_.__//____/ /____/\_,_/  \_, / \___//___/
-//                                                                                    /___/
-//                                              _____              ___
-//                                             / ___/ ___   ___   / _/ ___   ____ ___   ___  ____ ___
-//                                            / /__  / _ \ / _ \ / _/ / -_) / __// -_) / _ \/ __// -_)
-//                                            \___/  \___//_//_//_/   \__/ /_/   \__/ /_//_/\__/ \__/
-//
-//                                                               ____     ___
-//                                                              |_  /    / _ \
-//                                                             _/_ <  _ / // /
-//                                                            /____/ (_)\___/
-//
+// Creator: Chiru Labs
 
 pragma solidity ^0.8.4;
 
-import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibApp} from "../libraries/LibApp.sol";
-import {IW3LC3__ERC721A} from "../interfaces/IW3LC3__ERC721A.sol";
+import './IERC721AUpgradeable.sol';
+import {ERC721AStorage} from './ERC721AStorage.sol';
+import './ERC721A__Initializable.sol';
+import {IERC4906} from '@openzeppelin/contracts/interfaces/IERC4906.sol';
 
 /**
  * @dev Interface of ERC721 token receiver.
  */
-interface ERC721A__IERC721Receiver {
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);
+interface ERC721A__IERC721ReceiverUpgradeable {
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4);
 }
 
 /**
- * The attendee has already been registered.
- */
-error W3LC24_AlreadyAttended();
-
-/**
- * The attendee has already been registered.
- */
-error W3LC24_AttendeeDoesNotHaveATicket();
-
-/**
- * @title W3LC3__ERC721A
+ * @title ERC721A
  *
  * @dev Implementation of the [ERC721](https://eips.ethereum.org/EIPS/eip-721)
  * Non-Fungible Token Standard, including the Metadata extension.
@@ -108,7 +39,9 @@ error W3LC24_AttendeeDoesNotHaveATicket();
  * - An owner cannot have more than 2**64 - 1 (max value of uint64) of supply.
  * - The maximum token ID cannot exceed 2**256 - 1 (max value of uint256).
  */
-contract W3LC3__ERC721A is IW3LC3__ERC721A {
+contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
+    using ERC721AStorage for ERC721AStorage.Layout;
+
     // =============================================================
     //                           CONSTANTS
     // =============================================================
@@ -157,84 +90,23 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
 
     // The `Transfer` event signature is given by:
     // `keccak256(bytes("Transfer(address,address,uint256)"))`.
-    bytes32 private constant _TRANSFER_EVENT_SIGNATURE = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
-
-    // Token name
-    string private constant _name = "Web3Lagos Conference 3.0";
-    // Token symbol
-    string private constant _symbol = "W3LC3";
+    bytes32 private constant _TRANSFER_EVENT_SIGNATURE =
+        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
 
     // =============================================================
     //                          CONSTRUCTOR
     // =============================================================
 
-    constructor() {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function __ERC721A_init(string memory name_, string memory symbol_) internal onlyInitializingERC721A {
+        __ERC721A_init_unchained(name_, symbol_);
+    }
 
-        LibDiamond._grantRole(LibDiamond.DIAMOND_ADMIN_ROLE, msg.sender);
-        LibDiamond._grantRole(LibDiamond.W3LC3_ADMIN_ROLE, msg.sender);
-        s._currentIndex = _startTokenId();
+    function __ERC721A_init_unchained(string memory name_, string memory symbol_) internal onlyInitializingERC721A {
+        ERC721AStorage.layout()._name = name_;
+        ERC721AStorage.layout()._symbol = symbol_;
+        ERC721AStorage.layout()._currentIndex = _startTokenId();
 
         if (_sequentialUpTo() < _startTokenId()) _revert(SequentialUpToTooSmall.selector);
-    }
-
-    function SetW3LC3Admin(address _admin) external{
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-
-        LibDiamond._grantRole(LibDiamond.W3LC3_ADMIN_ROLE, _admin);
-    }
-
-    // =============================================================
-    //                       W3LC3 FUNCTIONS
-    // =============================================================
-
-    function w3lc3__setBaseURI(string memory uri) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        s._uri = uri;
-    }
-
-    function w3lc3__mintSingle(address to) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        _mint(to, 1);
-    }
-
-    function w3lc3__mintMultipe(address to, uint256 quantity) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        _mint(to, quantity);
-    }
-
-    function w3lc3__batchMint(address[] calldata to) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        for (uint256 i; i < to.length; i++) {
-            _mint(to[i], 1);
-        }
-    }
-
-    function w3lc3__batchTransfer(address[] calldata tos) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        for (uint256 i; i < tos.length; i++) {
-            w3lc3__transferFrom(_msgSenderERC721A(), tos[i], i + 1);
-        }
-    }
-
-    function w3lc3__batchTransfer(address[] calldata tos, uint256[] calldata tokenIds) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        for (uint256 i; i < tos.length; i++) {
-            w3lc3__transferFrom(_msgSenderERC721A(), tos[i], tokenIds[i]);
-        }
-    }
-
-    function w3lc3__verifyAttendance(address attendee) external {
-        LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
-        LibApp.AppStorage storage s = LibApp.appStorage();
-
-        if (s.attended[attendee] == true) revert W3LC24_AlreadyAttended();
-
-        if (w3lc3__balanceOf(attendee) == 0) revert W3LC24_AttendeeDoesNotHaveATicket();
-
-        s.attended[attendee] = true;
-        s.attendees.push(attendee);
     }
 
     // =============================================================
@@ -267,16 +139,8 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Returns the next token ID to be minted.
      */
-    function viewNextTokenId() external view returns (uint256) {
-        return _nextTokenId();
-    }
-
-    /**
-     * @dev Returns the next token ID to be minted.
-     */
     function _nextTokenId() internal view virtual returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._currentIndex;
+        return ERC721AStorage.layout()._currentIndex;
     }
 
     /**
@@ -284,15 +148,14 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Burned tokens will reduce the count.
      * To get the total number of tokens minted, please see {_totalMinted}.
      */
-    function w3lc3__totalSupply() public view virtual override returns (uint256 result) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function totalSupply() public view virtual override returns (uint256 result) {
         // Counter underflow is impossible as `_burnCounter` cannot be incremented
         // more than `_currentIndex + _spotMinted - _startTokenId()` times.
         unchecked {
             // With spot minting, the intermediate `result` can be temporarily negative,
             // and the computation must be unchecked.
-            result = s._currentIndex - s._burnCounter - _startTokenId();
-            if (_sequentialUpTo() != type(uint256).max) result += s._spotMinted;
+            result = ERC721AStorage.layout()._currentIndex - ERC721AStorage.layout()._burnCounter - _startTokenId();
+            if (_sequentialUpTo() != type(uint256).max) result += ERC721AStorage.layout()._spotMinted;
         }
     }
 
@@ -300,12 +163,11 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Returns the total amount of tokens minted in the contract.
      */
     function _totalMinted() internal view virtual returns (uint256 result) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
         // Counter underflow is impossible as `_currentIndex` does not decrement,
         // and it is initialized to `_startTokenId()`.
         unchecked {
-            result = s._currentIndex - _startTokenId();
-            if (_sequentialUpTo() != type(uint256).max) result += s._spotMinted;
+            result = ERC721AStorage.layout()._currentIndex - _startTokenId();
+            if (_sequentialUpTo() != type(uint256).max) result += ERC721AStorage.layout()._spotMinted;
         }
     }
 
@@ -313,16 +175,14 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Returns the total number of tokens burned.
      */
     function _totalBurned() internal view virtual returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._burnCounter;
+        return ERC721AStorage.layout()._burnCounter;
     }
 
     /**
      * @dev Returns the total number of tokens that are spot-minted.
      */
     function _totalSpotMinted() internal view virtual returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._spotMinted;
+        return ERC721AStorage.layout()._spotMinted;
     }
 
     // =============================================================
@@ -332,34 +192,32 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Returns the number of tokens in `owner`'s account.
      */
-    function w3lc3__balanceOf(address owner) public view virtual override returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function balanceOf(address owner) public view virtual override returns (uint256) {
         if (owner == address(0)) _revert(BalanceQueryForZeroAddress.selector);
-        return s._packedAddressData[owner] & _BITMASK_ADDRESS_DATA_ENTRY;
+        return ERC721AStorage.layout()._packedAddressData[owner] & _BITMASK_ADDRESS_DATA_ENTRY;
     }
 
     /**
      * Returns the number of tokens minted by `owner`.
      */
     function _numberMinted(address owner) internal view returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return (s._packedAddressData[owner] >> _BITPOS_NUMBER_MINTED) & _BITMASK_ADDRESS_DATA_ENTRY;
+        return
+            (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_MINTED) & _BITMASK_ADDRESS_DATA_ENTRY;
     }
 
     /**
      * Returns the number of tokens burned by or on behalf of `owner`.
      */
     function _numberBurned(address owner) internal view returns (uint256) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return (s._packedAddressData[owner] >> _BITPOS_NUMBER_BURNED) & _BITMASK_ADDRESS_DATA_ENTRY;
+        return
+            (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_BURNED) & _BITMASK_ADDRESS_DATA_ENTRY;
     }
 
     /**
      * Returns the auxiliary data for `owner`. (e.g. number of whitelist mint slots used).
      */
     function _getAux(address owner) internal view returns (uint64) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return uint64(s._packedAddressData[owner] >> _BITPOS_AUX);
+        return uint64(ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_AUX);
     }
 
     /**
@@ -367,15 +225,14 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * If there are multiple variables, please pack them into a uint64.
      */
     function _setAux(address owner, uint64 aux) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        uint256 packed = s._packedAddressData[owner];
+        uint256 packed = ERC721AStorage.layout()._packedAddressData[owner];
         uint256 auxCasted;
         // Cast `aux` with assembly to avoid redundant masking.
         assembly {
             auxCasted := aux
         }
         packed = (packed & _BITMASK_AUX_COMPLEMENT) | (auxCasted << _BITPOS_AUX);
-        s._packedAddressData[owner] = packed;
+        ERC721AStorage.layout()._packedAddressData[owner] = packed;
     }
 
     // =============================================================
@@ -408,25 +265,50 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Returns the token collection name.
      */
-    function w3lc3__name() public view virtual override returns (string memory) {
-        return _name;
+    function name() public view virtual override returns (string memory) {
+        return ERC721AStorage.layout()._name;
     }
 
     /**
      * @dev Returns the token collection symbol.
      */
-    function w3lc3__symbol() public view virtual override returns (string memory) {
-        return _symbol;
+    function symbol() public view virtual override returns (string memory) {
+        return ERC721AStorage.layout()._symbol;
     }
 
     /**
      * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
      */
-    function w3lc3__tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
 
+        string memory _tokenURI = ERC721AStorage.layout()._tokenURIs[tokenId];
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, _toString(tokenId))) : "";
+
+        // If there is no base URI, return the token URI.
+        if (bytes(baseURI).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via string.concat).
+        if (bytes(_tokenURI).length > 0) {
+            return string.concat(baseURI, _tokenURI);
+        }
+
+        return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, _toString(tokenId))) : '';
+    }
+
+    function _setBaseURI(string memory _uri) internal virtual {
+        ERC721AStorage.layout()._baseURI = _uri;
+    }
+
+    /**
+     * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
+     *
+     * Emits {MetadataUpdate}.
+     */
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
+        ERC721AStorage.layout()._tokenURIs[tokenId] = _tokenURI;
+        emit IERC4906.MetadataUpdate(tokenId);
     }
 
     /**
@@ -435,8 +317,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * by default, it can be overridden in child contracts.
      */
     function _baseURI() internal view virtual returns (string memory) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._uri;
+        return ERC721AStorage.layout()._baseURI;
     }
 
     // =============================================================
@@ -450,7 +331,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * - `tokenId` must exist.
      */
-    function w3lc3__ownerOf(uint256 tokenId) public view virtual override returns (address) {
+    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
         return address(uint160(_packedOwnershipOf(tokenId)));
     }
 
@@ -466,8 +347,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Returns the unpacked `TokenOwnership` struct at `index`.
      */
     function _ownershipAt(uint256 index) internal view virtual returns (TokenOwnership memory) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return _unpackedOwnership(s._packedOwnerships[index]);
+        return _unpackedOwnership(ERC721AStorage.layout()._packedOwnerships[index]);
     }
 
     /**
@@ -475,17 +355,15 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * An uninitialized slot does not necessarily mean that the slot has no owner.
      */
     function _ownershipIsInitialized(uint256 index) internal view virtual returns (bool) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._packedOwnerships[index] != 0;
+        return ERC721AStorage.layout()._packedOwnerships[index] != 0;
     }
 
     /**
      * @dev Initializes the ownership slot minted at `index` for efficiency purposes.
      */
     function _initializeOwnershipAt(uint256 index) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        if (s._packedOwnerships[index] == 0) {
-            s._packedOwnerships[index] = _packedOwnershipOf(index);
+        if (ERC721AStorage.layout()._packedOwnerships[index] == 0) {
+            ERC721AStorage.layout()._packedOwnerships[index] = _packedOwnershipOf(index);
         }
     }
 
@@ -493,9 +371,8 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Returns the packed ownership data of `tokenId`.
      */
     function _packedOwnershipOf(uint256 tokenId) private view returns (uint256 packed) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
         if (_startTokenId() <= tokenId) {
-            packed = s._packedOwnerships[tokenId];
+            packed = ERC721AStorage.layout()._packedOwnerships[tokenId];
 
             if (tokenId > _sequentialUpTo()) {
                 if (_packedOwnershipExists(packed)) return packed;
@@ -504,7 +381,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
 
             // If the data at the starting slot does not exist, start the scan.
             if (packed == 0) {
-                if (tokenId >= s._currentIndex) _revert(OwnerQueryForNonexistentToken.selector);
+                if (tokenId >= ERC721AStorage.layout()._currentIndex) _revert(OwnerQueryForNonexistentToken.selector);
                 // Invariant:
                 // There will always be an initialized ownership slot
                 // (i.e. `ownership.addr != address(0) && ownership.burned == false`)
@@ -516,7 +393,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
                 // If the address is zero, packed will be zero.
                 for (;;) {
                     unchecked {
-                        packed = s._packedOwnerships[--tokenId];
+                        packed = ERC721AStorage.layout()._packedOwnerships[--tokenId];
                     }
                     if (packed == 0) continue;
                     if (packed & _BITMASK_BURNED == 0) return packed;
@@ -579,7 +456,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * - The caller must own the token or be an approved operator.
      */
-    function w3lc3__approve(address to, uint256 tokenId) public payable virtual override {
+    function approve(address to, uint256 tokenId) public payable virtual override {
         _approve(to, tokenId, true);
     }
 
@@ -590,11 +467,10 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * - `tokenId` must exist.
      */
-    function w3lc3__getApproved(uint256 tokenId) public view virtual override returns (address) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function getApproved(uint256 tokenId) public view virtual override returns (address) {
         if (!_exists(tokenId)) _revert(ApprovalQueryForNonexistentToken.selector);
 
-        return s._tokenApprovals[tokenId].value;
+        return ERC721AStorage.layout()._tokenApprovals[tokenId].value;
     }
 
     /**
@@ -608,9 +484,8 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits an {ApprovalForAll} event.
      */
-    function w3lc3__setApprovalForAll(address operator, bool approved) public virtual override {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        s._operatorApprovals[_msgSenderERC721A()][operator] = approved;
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        ERC721AStorage.layout()._operatorApprovals[_msgSenderERC721A()][operator] = approved;
         emit ApprovalForAll(_msgSenderERC721A(), operator, approved);
     }
 
@@ -619,9 +494,8 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * See {setApprovalForAll}.
      */
-    function w3lc3__isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        return s._operatorApprovals[owner][operator];
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+        return ERC721AStorage.layout()._operatorApprovals[owner][operator];
     }
 
     /**
@@ -632,13 +506,13 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Tokens start existing when they are minted. See {_mint}.
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool result) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
         if (_startTokenId() <= tokenId) {
-            if (tokenId > _sequentialUpTo()) return _packedOwnershipExists(s._packedOwnerships[tokenId]);
+            if (tokenId > _sequentialUpTo())
+                return _packedOwnershipExists(ERC721AStorage.layout()._packedOwnerships[tokenId]);
 
-            if (tokenId < s._currentIndex) {
+            if (tokenId < ERC721AStorage.layout()._currentIndex) {
                 uint256 packed;
-                while ((packed = s._packedOwnerships[tokenId]) == 0) --tokenId;
+                while ((packed = ERC721AStorage.layout()._packedOwnerships[tokenId]) == 0) --tokenId;
                 result = packed & _BITMASK_BURNED == 0;
             }
         }
@@ -658,7 +532,11 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Returns whether `msgSender` is equal to `approvedAddress` or `owner`.
      */
-    function _isSenderApprovedOrOwner(address approvedAddress, address owner, address msgSender) private pure returns (bool result) {
+    function _isSenderApprovedOrOwner(
+        address approvedAddress,
+        address owner,
+        address msgSender
+    ) private pure returns (bool result) {
         assembly {
             // Mask `owner` to the lower 160 bits, in case the upper bits somehow aren't clean.
             owner := and(owner, _BITMASK_ADDRESS)
@@ -672,9 +550,12 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Returns the storage slot and value for the approved address of `tokenId`.
      */
-    function _getApprovedSlotAndAddress(uint256 tokenId) private view returns (uint256 approvedAddressSlot, address approvedAddress) {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        LibApp.TokenApprovalRef storage tokenApproval = s._tokenApprovals[tokenId];
+    function _getApprovedSlotAndAddress(uint256 tokenId)
+        private
+        view
+        returns (uint256 approvedAddressSlot, address approvedAddress)
+    {
+        ERC721AStorage.TokenApprovalRef storage tokenApproval = ERC721AStorage.layout()._tokenApprovals[tokenId];
         // The following is equivalent to `approvedAddress = _tokenApprovals[tokenId].value`.
         assembly {
             approvedAddressSlot := tokenApproval.slot
@@ -699,8 +580,11 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function w3lc3__transferFrom(address from, address to, uint256 tokenId) public payable virtual override {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public payable virtual override {
         uint256 prevOwnershipPacked = _packedOwnershipOf(tokenId);
 
         // Mask `from` to the lower 160 bits, in case the upper bits somehow aren't clean.
@@ -712,7 +596,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
 
         // The nested ifs save around 20+ gas over a compound boolean condition.
         if (!_isSenderApprovedOrOwner(approvedAddress, from, _msgSenderERC721A()))
-            if (!w3lc3__isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
+            if (!isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
 
         _beforeTokenTransfers(from, to, tokenId, 1);
 
@@ -729,25 +613,28 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
         // Counter overflow is incredibly unrealistic as `tokenId` would have to be 2**256.
         unchecked {
             // We can directly increment and decrement the balances.
-            --s._packedAddressData[from]; // Updates: `balance -= 1`.
-            ++s._packedAddressData[to]; // Updates: `balance += 1`.
+            --ERC721AStorage.layout()._packedAddressData[from]; // Updates: `balance -= 1`.
+            ++ERC721AStorage.layout()._packedAddressData[to]; // Updates: `balance += 1`.
 
             // Updates:
             // - `address` to the next owner.
             // - `startTimestamp` to the timestamp of transfering.
             // - `burned` to `false`.
             // - `nextInitialized` to `true`.
-            s._packedOwnerships[tokenId] = _packOwnershipData(to, _BITMASK_NEXT_INITIALIZED | _nextExtraData(from, to, prevOwnershipPacked));
+            ERC721AStorage.layout()._packedOwnerships[tokenId] = _packOwnershipData(
+                to,
+                _BITMASK_NEXT_INITIALIZED | _nextExtraData(from, to, prevOwnershipPacked)
+            );
 
             // If the next slot may not have been initialized (i.e. `nextInitialized == false`) .
             if (prevOwnershipPacked & _BITMASK_NEXT_INITIALIZED == 0) {
                 uint256 nextTokenId = tokenId + 1;
                 // If the next slot's address is zero and not burned (i.e. packed value is zero).
-                if (s._packedOwnerships[nextTokenId] == 0) {
+                if (ERC721AStorage.layout()._packedOwnerships[nextTokenId] == 0) {
                     // If the next slot is within bounds.
-                    if (nextTokenId != s._currentIndex) {
+                    if (nextTokenId != ERC721AStorage.layout()._currentIndex) {
                         // Initialize the next slot to maintain correctness for `ownerOf(tokenId + 1)`.
-                        s._packedOwnerships[nextTokenId] = prevOwnershipPacked;
+                        ERC721AStorage.layout()._packedOwnerships[nextTokenId] = prevOwnershipPacked;
                     }
                 }
             }
@@ -774,8 +661,12 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
     /**
      * @dev Equivalent to `safeTransferFrom(from, to, tokenId, '')`.
      */
-    function w3lc3__safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override {
-        w3lc3__safeTransferFrom(from, to, tokenId, "");
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public payable virtual override {
+        safeTransferFrom(from, to, tokenId, '');
     }
 
     /**
@@ -793,8 +684,13 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function w3lc3__safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override {
-        w3lc3__transferFrom(from, to, tokenId);
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public payable virtual override {
+        transferFrom(from, to, tokenId);
         if (to.code.length != 0)
             if (!_checkContractOnERC721Received(from, to, tokenId, _data)) {
                 _revert(TransferToNonERC721ReceiverImplementer.selector);
@@ -817,7 +713,12 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * - When `to` is zero, `tokenId` will be burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual {}
 
     /**
      * @dev Hook that is called after a set of serially-ordered token IDs
@@ -835,7 +736,12 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * - When `to` is zero, `tokenId` has been burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
+    function _afterTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual {}
 
     /**
      * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target contract.
@@ -847,9 +753,16 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Returns whether the call correctly returned the expected magic value.
      */
-    function _checkContractOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data) private returns (bool) {
-        try ERC721A__IERC721Receiver(to).onERC721Received(_msgSenderERC721A(), from, tokenId, _data) returns (bytes4 retval) {
-            return retval == ERC721A__IERC721Receiver(to).onERC721Received.selector;
+    function _checkContractOnERC721Received(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) private returns (bool) {
+        try
+            ERC721A__IERC721ReceiverUpgradeable(to).onERC721Received(_msgSenderERC721A(), from, tokenId, _data)
+        returns (bytes4 retval) {
+            return retval == ERC721A__IERC721ReceiverUpgradeable(to).onERC721Received.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
                 _revert(TransferToNonERC721ReceiverImplementer.selector);
@@ -875,8 +788,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Emits a {Transfer} event for each mint.
      */
     function _mint(address to, uint256 quantity) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        uint256 startTokenId = s._currentIndex;
+        uint256 startTokenId = ERC721AStorage.layout()._currentIndex;
         if (quantity == 0) _revert(MintZeroQuantity.selector);
 
         _beforeTokenTransfers(address(0), to, startTokenId, quantity);
@@ -890,14 +802,17 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             // - `startTimestamp` to the timestamp of minting.
             // - `burned` to `false`.
             // - `nextInitialized` to `quantity == 1`.
-            s._packedOwnerships[startTokenId] = _packOwnershipData(to, _nextInitializedFlag(quantity) | _nextExtraData(address(0), to, 0));
+            ERC721AStorage.layout()._packedOwnerships[startTokenId] = _packOwnershipData(
+                to,
+                _nextInitializedFlag(quantity) | _nextExtraData(address(0), to, 0)
+            );
 
             // Updates:
             // - `balance += quantity`.
             // - `numberMinted += quantity`.
             //
             // We can directly add to the `balance` and `numberMinted`.
-            s._packedAddressData[to] += quantity * ((1 << _BITPOS_NUMBER_MINTED) | 1);
+            ERC721AStorage.layout()._packedAddressData[to] += quantity * ((1 << _BITPOS_NUMBER_MINTED) | 1);
 
             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
             uint256 toMasked = uint256(uint160(to)) & _BITMASK_ADDRESS;
@@ -925,7 +840,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
                 // that overflows uint256 will make the loop run out of gas.
             } while (++tokenId != end);
 
-            s._currentIndex = end;
+            ERC721AStorage.layout()._currentIndex = end;
         }
         _afterTokenTransfers(address(0), to, startTokenId, quantity);
     }
@@ -952,8 +867,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Emits a {ConsecutiveTransfer} event.
      */
     function _mintERC2309(address to, uint256 quantity) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        uint256 startTokenId = s._currentIndex;
+        uint256 startTokenId = ERC721AStorage.layout()._currentIndex;
         if (to == address(0)) _revert(MintToZeroAddress.selector);
         if (quantity == 0) _revert(MintZeroQuantity.selector);
         if (quantity > _MAX_MINT_ERC2309_QUANTITY_LIMIT) _revert(MintERC2309QuantityExceedsLimit.selector);
@@ -967,20 +881,23 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             // - `numberMinted += quantity`.
             //
             // We can directly add to the `balance` and `numberMinted`.
-            s._packedAddressData[to] += quantity * ((1 << _BITPOS_NUMBER_MINTED) | 1);
+            ERC721AStorage.layout()._packedAddressData[to] += quantity * ((1 << _BITPOS_NUMBER_MINTED) | 1);
 
             // Updates:
             // - `address` to the owner.
             // - `startTimestamp` to the timestamp of minting.
             // - `burned` to `false`.
             // - `nextInitialized` to `quantity == 1`.
-            s._packedOwnerships[startTokenId] = _packOwnershipData(to, _nextInitializedFlag(quantity) | _nextExtraData(address(0), to, 0));
+            ERC721AStorage.layout()._packedOwnerships[startTokenId] = _packOwnershipData(
+                to,
+                _nextInitializedFlag(quantity) | _nextExtraData(address(0), to, 0)
+            );
 
             if (startTokenId + quantity - 1 > _sequentialUpTo()) _revert(SequentialMintExceedsLimit.selector);
 
             emit ConsecutiveTransfer(startTokenId, startTokenId + quantity - 1, address(0), to);
 
-            s._currentIndex = startTokenId + quantity;
+            ERC721AStorage.layout()._currentIndex = startTokenId + quantity;
         }
         _afterTokenTransfers(address(0), to, startTokenId, quantity);
     }
@@ -998,13 +915,16 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event for each mint.
      */
-    function _safeMint(address to, uint256 quantity, bytes memory _data) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function _safeMint(
+        address to,
+        uint256 quantity,
+        bytes memory _data
+    ) internal virtual {
         _mint(to, quantity);
 
         unchecked {
             if (to.code.length != 0) {
-                uint256 end = s._currentIndex;
+                uint256 end = ERC721AStorage.layout()._currentIndex;
                 uint256 index = end - quantity;
                 do {
                     if (!_checkContractOnERC721Received(address(0), to, index++, _data)) {
@@ -1013,7 +933,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
                 } while (index < end);
                 // This prevents reentrancy to `_safeMint`.
                 // It does not prevent reentrancy to `_safeMintSpot`.
-                if (s._currentIndex != end) revert();
+                if (ERC721AStorage.layout()._currentIndex != end) revert();
             }
         }
     }
@@ -1022,7 +942,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Equivalent to `_safeMint(to, quantity, '')`.
      */
     function _safeMint(address to, uint256 quantity) internal virtual {
-        _safeMint(to, quantity, "");
+        _safeMint(to, quantity, '');
     }
 
     /**
@@ -1039,9 +959,8 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Emits a {Transfer} event for each mint.
      */
     function _mintSpot(address to, uint256 tokenId) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
         if (tokenId <= _sequentialUpTo()) _revert(SpotMintTokenIdTooSmall.selector);
-        uint256 prevOwnershipPacked = s._packedOwnerships[tokenId];
+        uint256 prevOwnershipPacked = ERC721AStorage.layout()._packedOwnerships[tokenId];
         if (_packedOwnershipExists(prevOwnershipPacked)) _revert(TokenAlreadyExists.selector);
 
         _beforeTokenTransfers(address(0), to, tokenId, 1);
@@ -1055,14 +974,17 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             // - `startTimestamp` to the timestamp of minting.
             // - `burned` to `false`.
             // - `nextInitialized` to `true` (as `quantity == 1`).
-            s._packedOwnerships[tokenId] = _packOwnershipData(to, _nextInitializedFlag(1) | _nextExtraData(address(0), to, prevOwnershipPacked));
+            ERC721AStorage.layout()._packedOwnerships[tokenId] = _packOwnershipData(
+                to,
+                _nextInitializedFlag(1) | _nextExtraData(address(0), to, prevOwnershipPacked)
+            );
 
             // Updates:
             // - `balance += 1`.
             // - `numberMinted += 1`.
             //
             // We can directly add to the `balance` and `numberMinted`.
-            s._packedAddressData[to] += (1 << _BITPOS_NUMBER_MINTED) | 1;
+            ERC721AStorage.layout()._packedAddressData[to] += (1 << _BITPOS_NUMBER_MINTED) | 1;
 
             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
             uint256 toMasked = uint256(uint160(to)) & _BITMASK_ADDRESS;
@@ -1081,7 +1003,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
                 )
             }
 
-            ++s._spotMinted;
+            ++ERC721AStorage.layout()._spotMinted;
         }
 
         _afterTokenTransfers(address(0), to, tokenId, 1);
@@ -1102,19 +1024,22 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits a {Transfer} event.
      */
-    function _safeMintSpot(address to, uint256 tokenId, bytes memory _data) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
+    function _safeMintSpot(
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) internal virtual {
         _mintSpot(to, tokenId);
 
         unchecked {
             if (to.code.length != 0) {
-                uint256 currentSpotMinted = s._spotMinted;
+                uint256 currentSpotMinted = ERC721AStorage.layout()._spotMinted;
                 if (!_checkContractOnERC721Received(address(0), to, tokenId, _data)) {
                     _revert(TransferToNonERC721ReceiverImplementer.selector);
                 }
                 // This prevents reentrancy to `_safeMintSpot`.
                 // It does not prevent reentrancy to `_safeMint`.
-                if (s._spotMinted != currentSpotMinted) revert();
+                if (ERC721AStorage.layout()._spotMinted != currentSpotMinted) revert();
             }
         }
     }
@@ -1123,7 +1048,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Equivalent to `_safeMintSpot(to, tokenId, '')`.
      */
     function _safeMintSpot(address to, uint256 tokenId) internal virtual {
-        _safeMintSpot(to, tokenId, "");
+        _safeMintSpot(to, tokenId, '');
     }
 
     // =============================================================
@@ -1150,16 +1075,19 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      *
      * Emits an {Approval} event.
      */
-    function _approve(address to, uint256 tokenId, bool approvalCheck) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        address owner = w3lc3__ownerOf(tokenId);
+    function _approve(
+        address to,
+        uint256 tokenId,
+        bool approvalCheck
+    ) internal virtual {
+        address owner = ownerOf(tokenId);
 
         if (approvalCheck && _msgSenderERC721A() != owner)
-            if (!w3lc3__isApprovedForAll(owner, _msgSenderERC721A())) {
+            if (!isApprovedForAll(owner, _msgSenderERC721A())) {
                 _revert(ApprovalCallerNotOwnerNorApproved.selector);
             }
 
-        s._tokenApprovals[tokenId].value = to;
+        ERC721AStorage.layout()._tokenApprovals[tokenId].value = to;
         emit Approval(owner, to, tokenId);
     }
 
@@ -1185,7 +1113,6 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 tokenId, bool approvalCheck) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
         uint256 prevOwnershipPacked = _packedOwnershipOf(tokenId);
 
         address from = address(uint160(prevOwnershipPacked));
@@ -1195,7 +1122,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
         if (approvalCheck) {
             // The nested ifs save around 20+ gas over a compound boolean condition.
             if (!_isSenderApprovedOrOwner(approvedAddress, from, _msgSenderERC721A()))
-                if (!w3lc3__isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
+                if (!isApprovedForAll(from, _msgSenderERC721A())) _revert(TransferCallerNotOwnerNorApproved.selector);
         }
 
         _beforeTokenTransfers(from, address(0), tokenId, 1);
@@ -1218,14 +1145,14 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             //
             // We can directly decrement the balance, and increment the number burned.
             // This is equivalent to `packed -= 1; packed += 1 << _BITPOS_NUMBER_BURNED;`.
-            s._packedAddressData[from] += (1 << _BITPOS_NUMBER_BURNED) - 1;
+            ERC721AStorage.layout()._packedAddressData[from] += (1 << _BITPOS_NUMBER_BURNED) - 1;
 
             // Updates:
             // - `address` to the last owner.
             // - `startTimestamp` to the timestamp of burning.
             // - `burned` to `true`.
             // - `nextInitialized` to `true`.
-            s._packedOwnerships[tokenId] = _packOwnershipData(
+            ERC721AStorage.layout()._packedOwnerships[tokenId] = _packOwnershipData(
                 from,
                 (_BITMASK_BURNED | _BITMASK_NEXT_INITIALIZED) | _nextExtraData(from, address(0), prevOwnershipPacked)
             );
@@ -1234,11 +1161,11 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             if (prevOwnershipPacked & _BITMASK_NEXT_INITIALIZED == 0) {
                 uint256 nextTokenId = tokenId + 1;
                 // If the next slot's address is zero and not burned (i.e. packed value is zero).
-                if (s._packedOwnerships[nextTokenId] == 0) {
+                if (ERC721AStorage.layout()._packedOwnerships[nextTokenId] == 0) {
                     // If the next slot is within bounds.
-                    if (nextTokenId != s._currentIndex) {
+                    if (nextTokenId != ERC721AStorage.layout()._currentIndex) {
                         // Initialize the next slot to maintain correctness for `ownerOf(tokenId + 1)`.
-                        s._packedOwnerships[nextTokenId] = prevOwnershipPacked;
+                        ERC721AStorage.layout()._packedOwnerships[nextTokenId] = prevOwnershipPacked;
                     }
                 }
             }
@@ -1249,7 +1176,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
 
         // Overflow not possible, as `_burnCounter` cannot be exceed `_currentIndex + _spotMinted` times.
         unchecked {
-            s._burnCounter++;
+            ERC721AStorage.layout()._burnCounter++;
         }
     }
 
@@ -1261,8 +1188,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * @dev Directly sets the extra data for the ownership data `index`.
      */
     function _setExtraDataAt(uint256 index, uint24 extraData) internal virtual {
-        LibApp.AppStorage storage s = LibApp.appStorage();
-        uint256 packed = s._packedOwnerships[index];
+        uint256 packed = ERC721AStorage.layout()._packedOwnerships[index];
         if (packed == 0) _revert(OwnershipNotInitializedForExtraData.selector);
         uint256 extraDataCasted;
         // Cast `extraData` with assembly to avoid redundant masking.
@@ -1270,7 +1196,7 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
             extraDataCasted := extraData
         }
         packed = (packed & _BITMASK_EXTRA_DATA_COMPLEMENT) | (extraDataCasted << _BITPOS_EXTRA_DATA);
-        s._packedOwnerships[index] = packed;
+        ERC721AStorage.layout()._packedOwnerships[index] = packed;
     }
 
     /**
@@ -1287,13 +1213,21 @@ contract W3LC3__ERC721A is IW3LC3__ERC721A {
      * - When `to` is zero, `tokenId` will be burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _extraData(address from, address to, uint24 previousExtraData) internal view virtual returns (uint24) {}
+    function _extraData(
+        address from,
+        address to,
+        uint24 previousExtraData
+    ) internal view virtual returns (uint24) {}
 
     /**
      * @dev Returns the next extra data for the packed ownership data.
      * The returned result is shifted into position.
      */
-    function _nextExtraData(address from, address to, uint256 prevOwnershipPacked) private view returns (uint256) {
+    function _nextExtraData(
+        address from,
+        address to,
+        uint256 prevOwnershipPacked
+    ) private view returns (uint256) {
         uint24 extraData = uint24(prevOwnershipPacked >> _BITPOS_EXTRA_DATA);
         return uint256(_extraData(from, to, extraData)) << _BITPOS_EXTRA_DATA;
     }
