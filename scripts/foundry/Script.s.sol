@@ -7,7 +7,6 @@ import {DiamondInit} from "../../contracts/upgradeInitializers/DiamondInit.sol";
 
 import {DiamondCutFacet} from "../../contracts/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../../contracts/facets/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "../../contracts/facets/OwnershipFacet.sol";
 import {AccessControlFacet} from "../../contracts/facets/AccessControlFacet.sol";
 import {W3LC2024Facet} from "../../contracts/facets/W3LC2024Facet.sol";
 
@@ -17,7 +16,6 @@ import {IDiamondLoupe} from "../../contracts/interfaces/IDiamondLoupe.sol";
 import {IAccessControl} from "../../contracts/interfaces/IAccessControl.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IERC165} from "../../contracts/interfaces/IERC165.sol";
-import {IERC173} from "../../contracts/interfaces/IERC173.sol";
 
 import {LibDiamond, DiamondArgs} from "../../contracts/libraries/LibDiamond.sol";
 
@@ -76,7 +74,7 @@ contract DeployHostIT is Script {
         accessControlSelectors[5] = AccessControlFacet.setRoleAdmin.selector;
 
         bytes4[] memory w3lc2024Selectors = new bytes4[](2);
-        w3lc2024Selectors[0] = W3LC2024Facet.setW3LC32024NFT.selector;
+        // w3lc2024Selectors[0] = W3LC2024Facet.setW3LC32024NFT.selector;
         w3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
 
         // Populate the `cuts` array with the needed data.
@@ -95,16 +93,36 @@ contract DeployHostIT is Script {
     }
 }
 
-contract DeployAndInitW3LC2024NFT is Script {
+
+
+contract UpdateW3LC2024Facet is Script {
     function run() external {
         
-        uint256 privateKey = vm.envUint("ANVIL_PRIVATE_KEY");
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
         vm.startBroadcast(privateKey);
 
-        W3LC2024Upgradeable w3lc2024Upgradeable = new W3LC2024Upgradeable();
-        console.log("W3LC2024Upgradeable address: ", address(w3lc2024Upgradeable));
+        W3LC2024Facet w3lc2024Facet = new W3LC2024Facet();
 
-        w3lc2024Upgradeable.initialize(msg.sender);
+        FacetCut[] memory cuts = new FacetCut[](2);
+
+        bytes4[] memory removeW3lc2024Selectors = new bytes4[](2);
+        removeW3lc2024Selectors[0] = 0xe76592f7; // W3LC2024Facet.w3lc2024__verifyAttendance.selector
+        removeW3lc2024Selectors[1] = 0xcd695221; // W3LC2024Facet.setW3LC32024NFT.selector;
+
+        bytes4[] memory addW3lc2024Selectors = new bytes4[](7);
+        addW3lc2024Selectors[0] = W3LC2024Facet.setW3LC2024NFT.selector;
+        addW3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__setDayActive.selector;
+        addW3lc2024Selectors[2] = W3LC2024Facet.w3lc2024__setDayInactive.selector;
+        addW3lc2024Selectors[3] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+        addW3lc2024Selectors[4] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
+        addW3lc2024Selectors[5] = W3LC2024Facet.w3lc2024__returnAttendance.selector;
+        addW3lc2024Selectors[6] = W3LC2024Facet.w3lc2024__isDayActive.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(0), action: FacetCutAction.Remove, functionSelectors: removeW3lc2024Selectors});
+        cuts[1] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
+
+        IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
 
         vm.stopBroadcast();
     }
@@ -116,7 +134,7 @@ contract SetW3LC2024 is Script{
         vm.startBroadcast(privateKey);
 
         HostIT diamond;
-        // address(diamond) = 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707;
 
+        vm.stopBroadcast();
     }
 }

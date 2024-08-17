@@ -3,6 +3,7 @@ require('@nomiclabs/hardhat-waffle')
 /* hardhat-foundry */
 require("@nomicfoundation/hardhat-foundry");
 require("@nomicfoundation/hardhat-ignition");
+require("hardhat-diamond-abi");
 require("dotenv").config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -23,6 +24,10 @@ task('accounts', 'Prints the list of accounts', async () => {
  */
 module.exports = {
   solidity: '0.8.25',
+  diamondAbi: {
+    // (required) The name of your Diamond ABI
+    name: "HostITDiamond",
+  },
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",

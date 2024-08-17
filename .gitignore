@@ -1,5 +1,6 @@
 node_modules
 scripts/python/.venv
+yarn.lock
 
 #Foundry files
 out
