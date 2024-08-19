@@ -140,9 +140,50 @@ contract ReplaceW3LC2024Facet is Script {
         FacetCut[] memory cuts = new FacetCut[](1);
 
         bytes4[] memory replaceW3lc2024Selectors = new bytes4[](1);
-        addW3lc2024Selectors[0] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+        replaceW3lc2024Selectors[0] = W3LC2024Facet.w3lc2024__markAttendance.selector;
 
         cuts[0] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Replace, functionSelectors: replaceW3lc2024Selectors});
+
+        IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
+
+        vm.stopBroadcast();
+    }
+}
+
+contract Replace2W3LC2024Facet is Script {
+    function run() external {
+        
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
+        vm.startBroadcast(privateKey);
+
+        W3LC2024Facet w3lc2024Facet = new W3LC2024Facet();
+
+        FacetCut[] memory cuts = new FacetCut[](3);
+
+        bytes4[] memory removeW3lc2024Selectors = new bytes4[](6);
+        removeW3lc2024Selectors[0] = 0x059fa3e5;
+        removeW3lc2024Selectors[1] = 0xb7af5e31;
+        removeW3lc2024Selectors[2] = 0xce715db4;
+        removeW3lc2024Selectors[3] = 0xf5f03e46;
+        removeW3lc2024Selectors[4] = 0x3d3a0188;
+        removeW3lc2024Selectors[5] = 0x6f1537fb;
+
+        bytes4[] memory remove2W3lc2024Selectors = new bytes4[](1);
+        remove2W3lc2024Selectors[0] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+
+        bytes4[] memory addW3lc2024Selectors = new bytes4[](7);
+        addW3lc2024Selectors[0] = W3LC2024Facet.setW3LC2024NFT.selector;
+        addW3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__setDayActive.selector;
+        addW3lc2024Selectors[2] = W3LC2024Facet.w3lc2024__setDayInactive.selector;
+        addW3lc2024Selectors[3] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+        addW3lc2024Selectors[4] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
+        addW3lc2024Selectors[5] = W3LC2024Facet.w3lc2024__returnAttendance.selector;
+        addW3lc2024Selectors[6] = W3LC2024Facet.w3lc2024__isDayActive.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(0), action: FacetCutAction.Remove, functionSelectors: removeW3lc2024Selectors});
+        cuts[1] = FacetCut({facetAddress: address(0), action: FacetCutAction.Remove, functionSelectors: remove2W3lc2024Selectors});
+        cuts[2] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
 
         IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
 
