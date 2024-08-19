@@ -25,6 +25,11 @@ error W3LC2024__InvalidDay();
  */
 error W3LC2024__DayNotActive();
 
+/**
+ * Mint failed.
+ */
+error W3LC2024__UnableToMint();
+
 contract W3LC2024Facet {
     /**
      * @dev Sets the address for W3LC2024 NFT ticket to `_w3lc2024nft`.
@@ -70,7 +75,7 @@ contract W3LC2024Facet {
 
     /**
      * @dev Marks the attendance of an `attendee` for the `day` to true.
-     * 
+     *
      * Also stores the `attendee` in an attendees array for the `day`
      *
      * Requirements:
@@ -90,19 +95,22 @@ contract W3LC2024Facet {
 
         if (s.attended[attendee][day] == true) revert W3LC2024__AlreadyAttended();
 
-        if (IERC721A(s.W3LC2024NFT).balanceOf(attendee) == 0) revert W3LC2024__AttendeeDoesNotHaveATicket();
-
-        s.attended[attendee][day] = true;
+        if (IERC721A(s.W3LC2024NFT).balanceOf(attendee) == 0) {
+            (bool ok, ) = address(s.W3LC2024NFT).call{value: 0}(abi.encodeWithSignature("mintSingle(address)", attendee));
+            if (!ok) revert W3LC2024__UnableToMint();
+        }
 
         if (day == LibApp.W3LC2024AttendanceDay.Day1) {
             s.day1Attendees.push(attendee);
         } else if (day == LibApp.W3LC2024AttendanceDay.Day2) {
             s.day2Attendees.push(attendee);
-        } else if (day == LibApp.W3LC2024AttendanceDay.Day2) {
+        } else if (day == LibApp.W3LC2024AttendanceDay.Day3) {
             s.day3Attendees.push(attendee);
         } else {
             revert W3LC2024__InvalidDay();
         }
+
+        s.attended[attendee][day] = true;
 
         emit LibApp.AttendedW3LC2024(attendee, day);
     }
@@ -124,7 +132,7 @@ contract W3LC2024Facet {
      * @dev Returns array of marked `attendee` for all the `day`.
      *
      */
-    function w3lc2024__returnAttendance() external view  returns (address[] memory day1, address[] memory day2,  address[] memory day3) {
+    function w3lc2024__returnAttendance() external view returns (address[] memory day1, address[] memory day2, address[] memory day3) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
         day1 = s.day1Attendees;

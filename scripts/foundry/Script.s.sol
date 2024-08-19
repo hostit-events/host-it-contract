@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Script, console} from "lib/forge-std/src/Script.sol";
+import {Script, console} from "forge-std/Script.sol";
 
 import {DiamondInit} from "../../contracts/upgradeInitializers/DiamondInit.sol";
 
@@ -85,7 +85,7 @@ contract DeployHostIT is Script {
         cuts[2] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: w3lc2024Selectors});
 
         // Upgrade our diamond with the remaining facets by making the cuts. Must be owner!
-        IDiamondCut(address(diamond)).diamondCut(cuts, address(diamondInit), abi.encodeWithSignature("init()"));
+        IDiamondCut(address(diamond)).diamondCut(cuts, address(0), "");
 
         // console.log("Diamond cuts complete. Owner of Diamond:", IAccessControl(address(diamond)).getRoleAdmin(LibDiamond.DIAMOND_ADMIN_ROLE));
 
@@ -121,6 +121,28 @@ contract UpdateW3LC2024Facet is Script {
 
         cuts[0] = FacetCut({facetAddress: address(0), action: FacetCutAction.Remove, functionSelectors: removeW3lc2024Selectors});
         cuts[1] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
+
+        IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
+
+        vm.stopBroadcast();
+    }
+}
+
+contract ReplaceW3LC2024Facet is Script {
+    function run() external {
+        
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
+        vm.startBroadcast(privateKey);
+
+        W3LC2024Facet w3lc2024Facet = new W3LC2024Facet();
+
+        FacetCut[] memory cuts = new FacetCut[](1);
+
+        bytes4[] memory replaceW3lc2024Selectors = new bytes4[](1);
+        addW3lc2024Selectors[0] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Replace, functionSelectors: replaceW3lc2024Selectors});
 
         IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
 
