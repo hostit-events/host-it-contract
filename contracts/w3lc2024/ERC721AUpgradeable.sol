@@ -3,22 +3,15 @@
 // Creator: Chiru Labs
 
 pragma solidity ^0.8.4;
-
-import './IERC721AUpgradeable.sol';
-import {ERC721AStorage} from './ERC721AStorage.sol';
-import './ERC721A__Initializable.sol';
-import {IERC4906} from '@openzeppelin/contracts/interfaces/IERC4906.sol';
+import "./IERC721AUpgradeable.sol";
+import {ERC721AStorage} from "./ERC721AStorage.sol";
+import "./ERC721A__Initializable.sol";
 
 /**
  * @dev Interface of ERC721 token receiver.
  */
 interface ERC721A__IERC721ReceiverUpgradeable {
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external returns (bytes4);
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);
 }
 
 /**
@@ -90,8 +83,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
 
     // The `Transfer` event signature is given by:
     // `keccak256(bytes("Transfer(address,address,uint256)"))`.
-    bytes32 private constant _TRANSFER_EVENT_SIGNATURE =
-        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
+    bytes32 private constant _TRANSFER_EVENT_SIGNATURE = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
 
     // =============================================================
     //                          CONSTRUCTOR
@@ -201,16 +193,14 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * Returns the number of tokens minted by `owner`.
      */
     function _numberMinted(address owner) internal view returns (uint256) {
-        return
-            (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_MINTED) & _BITMASK_ADDRESS_DATA_ENTRY;
+        return (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_MINTED) & _BITMASK_ADDRESS_DATA_ENTRY;
     }
 
     /**
      * Returns the number of tokens burned by or on behalf of `owner`.
      */
     function _numberBurned(address owner) internal view returns (uint256) {
-        return
-            (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_BURNED) & _BITMASK_ADDRESS_DATA_ENTRY;
+        return (ERC721AStorage.layout()._packedAddressData[owner] >> _BITPOS_NUMBER_BURNED) & _BITMASK_ADDRESS_DATA_ENTRY;
     }
 
     /**
@@ -294,12 +284,22 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
             return string.concat(baseURI, _tokenURI);
         }
 
-        return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, _toString(tokenId))) : '';
+        return baseURI; // returns the same image for all ids
     }
 
     function _setBaseURI(string memory _uri) internal virtual {
+        string memory prevURI = ERC721AStorage.layout()._baseURI;
         ERC721AStorage.layout()._baseURI = _uri;
+        emit ERC721AStorage.ContractURIUpdated(prevURI, _uri);
     }
+
+    /**
+     * @dev This event emits when the metadata of a token is changed.
+     *
+     * So that the third-party platforms such as NFT market could
+     * timely update the images and related attributes of the NFT.
+     */
+    event MetadataUpdate(uint256 _tokenId);
 
     /**
      * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
@@ -308,7 +308,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      */
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
         ERC721AStorage.layout()._tokenURIs[tokenId] = _tokenURI;
-        emit IERC4906.MetadataUpdate(tokenId);
+        emit MetadataUpdate(tokenId);
     }
 
     /**
@@ -507,8 +507,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool result) {
         if (_startTokenId() <= tokenId) {
-            if (tokenId > _sequentialUpTo())
-                return _packedOwnershipExists(ERC721AStorage.layout()._packedOwnerships[tokenId]);
+            if (tokenId > _sequentialUpTo()) return _packedOwnershipExists(ERC721AStorage.layout()._packedOwnerships[tokenId]);
 
             if (tokenId < ERC721AStorage.layout()._currentIndex) {
                 uint256 packed;
@@ -532,11 +531,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
     /**
      * @dev Returns whether `msgSender` is equal to `approvedAddress` or `owner`.
      */
-    function _isSenderApprovedOrOwner(
-        address approvedAddress,
-        address owner,
-        address msgSender
-    ) private pure returns (bool result) {
+    function _isSenderApprovedOrOwner(address approvedAddress, address owner, address msgSender) private pure returns (bool result) {
         assembly {
             // Mask `owner` to the lower 160 bits, in case the upper bits somehow aren't clean.
             owner := and(owner, _BITMASK_ADDRESS)
@@ -550,11 +545,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
     /**
      * @dev Returns the storage slot and value for the approved address of `tokenId`.
      */
-    function _getApprovedSlotAndAddress(uint256 tokenId)
-        private
-        view
-        returns (uint256 approvedAddressSlot, address approvedAddress)
-    {
+    function _getApprovedSlotAndAddress(uint256 tokenId) private view returns (uint256 approvedAddressSlot, address approvedAddress) {
         ERC721AStorage.TokenApprovalRef storage tokenApproval = ERC721AStorage.layout()._tokenApprovals[tokenId];
         // The following is equivalent to `approvedAddress = _tokenApprovals[tokenId].value`.
         assembly {
@@ -580,11 +571,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public payable virtual override {
+    function transferFrom(address from, address to, uint256 tokenId) public payable virtual override {
         uint256 prevOwnershipPacked = _packedOwnershipOf(tokenId);
 
         // Mask `from` to the lower 160 bits, in case the upper bits somehow aren't clean.
@@ -661,12 +648,8 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
     /**
      * @dev Equivalent to `safeTransferFrom(from, to, tokenId, '')`.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public payable virtual override {
-        safeTransferFrom(from, to, tokenId, '');
+    function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override {
+        safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
@@ -684,12 +667,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public payable virtual override {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override {
         transferFrom(from, to, tokenId);
         if (to.code.length != 0)
             if (!_checkContractOnERC721Received(from, to, tokenId, _data)) {
@@ -713,12 +691,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * - When `to` is zero, `tokenId` will be burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _beforeTokenTransfers(
-        address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
-    ) internal virtual {}
+    function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
      * @dev Hook that is called after a set of serially-ordered token IDs
@@ -736,12 +709,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * - When `to` is zero, `tokenId` has been burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _afterTokenTransfers(
-        address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
-    ) internal virtual {}
+    function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
      * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target contract.
@@ -753,15 +721,8 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Returns whether the call correctly returned the expected magic value.
      */
-    function _checkContractOnERC721Received(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) private returns (bool) {
-        try
-            ERC721A__IERC721ReceiverUpgradeable(to).onERC721Received(_msgSenderERC721A(), from, tokenId, _data)
-        returns (bytes4 retval) {
+    function _checkContractOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data) private returns (bool) {
+        try ERC721A__IERC721ReceiverUpgradeable(to).onERC721Received(_msgSenderERC721A(), from, tokenId, _data) returns (bytes4 retval) {
             return retval == ERC721A__IERC721ReceiverUpgradeable(to).onERC721Received.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
@@ -915,11 +876,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Emits a {Transfer} event for each mint.
      */
-    function _safeMint(
-        address to,
-        uint256 quantity,
-        bytes memory _data
-    ) internal virtual {
+    function _safeMint(address to, uint256 quantity, bytes memory _data) internal virtual {
         _mint(to, quantity);
 
         unchecked {
@@ -942,7 +899,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * @dev Equivalent to `_safeMint(to, quantity, '')`.
      */
     function _safeMint(address to, uint256 quantity) internal virtual {
-        _safeMint(to, quantity, '');
+        _safeMint(to, quantity, "");
     }
 
     /**
@@ -1024,11 +981,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function _safeMintSpot(
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
+    function _safeMintSpot(address to, uint256 tokenId, bytes memory _data) internal virtual {
         _mintSpot(to, tokenId);
 
         unchecked {
@@ -1048,7 +1001,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * @dev Equivalent to `_safeMintSpot(to, tokenId, '')`.
      */
     function _safeMintSpot(address to, uint256 tokenId) internal virtual {
-        _safeMintSpot(to, tokenId, '');
+        _safeMintSpot(to, tokenId, "");
     }
 
     // =============================================================
@@ -1075,11 +1028,7 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      *
      * Emits an {Approval} event.
      */
-    function _approve(
-        address to,
-        uint256 tokenId,
-        bool approvalCheck
-    ) internal virtual {
+    function _approve(address to, uint256 tokenId, bool approvalCheck) internal virtual {
         address owner = ownerOf(tokenId);
 
         if (approvalCheck && _msgSenderERC721A() != owner)
@@ -1213,21 +1162,13 @@ contract ERC721AUpgradeable is ERC721A__Initializable, IERC721AUpgradeable {
      * - When `to` is zero, `tokenId` will be burned by `from`.
      * - `from` and `to` are never both zero.
      */
-    function _extraData(
-        address from,
-        address to,
-        uint24 previousExtraData
-    ) internal view virtual returns (uint24) {}
+    function _extraData(address from, address to, uint24 previousExtraData) internal view virtual returns (uint24) {}
 
     /**
      * @dev Returns the next extra data for the packed ownership data.
      * The returned result is shifted into position.
      */
-    function _nextExtraData(
-        address from,
-        address to,
-        uint256 prevOwnershipPacked
-    ) private view returns (uint256) {
+    function _nextExtraData(address from, address to, uint256 prevOwnershipPacked) private view returns (uint256) {
         uint24 extraData = uint24(prevOwnershipPacked >> _BITPOS_EXTRA_DATA);
         return uint256(_extraData(from, to, extraData)) << _BITPOS_EXTRA_DATA;
     }

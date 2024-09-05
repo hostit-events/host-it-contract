@@ -12,7 +12,6 @@ struct RoleData {
  * @dev External interface of AccessControl declared to support ERC-165 detection.
  */
 interface IAccessControl {
-
     /**
      * @dev The `account` is missing a role.
      */

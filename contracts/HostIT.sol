@@ -10,14 +10,14 @@ pragma solidity ^0.8.0;
 
 import {LibDiamond, DiamondArgs} from "./libraries/LibDiamond.sol";
 import {FacetCut} from "./interfaces/IDiamondCut.sol";
-
-// When no function exists for function called
-error Diamond_FunctionNotFound(bytes4 _functionSelector);
+import {Errors} from "./libraries/constants/Errors.sol";
 
 contract HostIT {
     constructor(address _contractAdmin, FacetCut[] memory _diamondCut, DiamondArgs memory _args) payable {
-        // Grant `_contractAdmin` address the diamond admin role a.k.a default admin role
-        require(LibDiamond._grantRole(LibDiamond.DIAMOND_ADMIN_ROLE, _contractAdmin));
+        // Grant `_contractAdmin` address the default admin role
+        LibDiamond._grantRole(LibDiamond.DEFAULT_ADMIN_ROLE, _contractAdmin);
+        // Grant `_contractAdmin` address the diamond role
+        LibDiamond._grantRole(LibDiamond.DIAMOND_ADMIN_ROLE, _contractAdmin);
 
         // Add the diamondCut external function from the diamondCutFacet
         LibDiamond.diamondCut(_diamondCut, _args.init, _args.initCalldata);
@@ -28,15 +28,16 @@ contract HostIT {
     fallback() external payable {
         LibDiamond.DiamondStorage storage ds;
         bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
+
         // get diamond storage
         assembly {
             ds.slot := position
         }
+
         // get facet from function selector
         address facet = ds.selectorToFacetAndPosition[msg.sig].facetAddress;
-        if (facet == address(0)) {
-            revert Diamond_FunctionNotFound(msg.sig);
-        }
+        if (facet == address(0)) revert Errors.Diamond_FunctionNotFound(msg.sig);
+
         // Execute external function from facet using delegatecall and return any value.
         assembly {
             // copy function selector and any arguments
