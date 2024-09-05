@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 library LibApp {
-    event AttendedW3LC2024(address indexed attendee, W3LC2024AttendanceDay indexed day);
+    event AttendedW3LC2024(address indexed attendee, W3LC2024AttendanceDay indexed day, uint256 time);
     struct AppStorage {
         // =============================================================
         //                      W3LC2024 STORAGE

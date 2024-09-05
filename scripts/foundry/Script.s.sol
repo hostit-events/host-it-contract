@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 
@@ -23,41 +23,62 @@ import {HostIT} from "../../contracts/HostIT.sol";
 import {W3LC2024Upgradeable} from "../../contracts/w3lc2024/W3LC2024Upgradeable.sol";
 
 contract DeployHostIT is Script {
+    DiamondInit diamondInit;
+    DiamondCutFacet diamondCutFacet;
+    DiamondLoupeFacet diamondLoupeFacet;
+    AccessControlFacet accessControlFacet;
+    W3LC2024Facet w3lc2024Facet;
+    HostIT diamond;
+
+    address constant backendAddr = 0xc408235a9A01767d70B41C98d92F2dC7B0d959f4;
+    address constant w3lcNFT = 0xFE907A3Eb44782A5f96AAf345ed48877bCC080e7;
+    // roles
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant DIAMOND_ADMIN_ROLE = keccak256("DIAMOND_ADMIN_ROLE");
+    bytes32 constant W3LC3_ADMIN_ROLE = keccak256("W3LC3_ADMIN_ROLE");
+
+    
+    function setSetW3LC2024NFT() internal {
+        // Set W3LC2024 NFT
+        W3LC2024Facet(address(diamond)).setW3LC2024NFT(w3lcNFT);
+    }
+
+    function grantDiamondAdminRole() internal {
+        // Grant diamond W3LC2024 NFT admin role
+        W3LC2024Upgradeable(w3lcNFT).grantRole(DEFAULT_ADMIN_ROLE, address(diamond));
+    }
+
+    function grantBackendAdminRole() internal {
+        // Grant backend W3LC2024 NFT admin role
+        IAccessControl(address(w3lcNFT)).grantRole(DEFAULT_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer W3LC2024 NFT admin role
+        IAccessControl(address(w3lcNFT)).grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // Grant backend W3LC2024 Facet admin role
+        IAccessControl(address(diamond)).grantRole(W3LC3_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer W3LC2024 Facet admin role
+        IAccessControl(address(diamond)).grantRole(W3LC3_ADMIN_ROLE, msg.sender);
+    }
+
     function run() external {
-        uint256 privateKey = vm.envUint("ANVIL_PRIVATE_KEY");
-        vm.startBroadcast(privateKey);
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast();
 
         // Start by deploying the DiamonInit contract.
-        DiamondInit diamondInit = new DiamondInit();
-        DiamondCutFacet diamondCutFacet = new DiamondCutFacet();
-        DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
-        AccessControlFacet accessControlFacet = new AccessControlFacet();
-        W3LC2024Facet w3lc2024Facet = new W3LC2024Facet();
+        diamondInit = new DiamondInit();
+        diamondCutFacet = new DiamondCutFacet();
+        diamondLoupeFacet = new DiamondLoupeFacet();
+        accessControlFacet = new AccessControlFacet();
+        w3lc2024Facet = new W3LC2024Facet();
 
-        FacetCut[] memory initCut = new FacetCut[](1);
+        FacetCut[] memory initCut = new FacetCut[](4);
 
+        // Get function selectors for facets for `cuts` array.
         bytes4[] memory initCutSelectors = new bytes4[](1);
         initCutSelectors[0] = IDiamondCut.diamondCut.selector;
 
-        initCut[0] = FacetCut({facetAddress: address(diamondCutFacet), action: FacetCutAction.Add, functionSelectors: initCutSelectors});
-
-        // Build the DiamondArgs.
-        DiamondArgs memory initDiamondArgs = DiamondArgs({
-            init: address(diamondInit),
-            // NOTE: "interfaceId" can be used since "init" is the only function in IDiamondInit.
-            initCalldata: abi.encode(type(IDiamondInit).interfaceId)
-        });
-
-        // Deploy the diamond.
-        console.log("Message sender", msg.sender);
-        HostIT diamond = new HostIT(msg.sender, initCut, initDiamondArgs);
-        console.log("Diamond address: ", address(diamond));
-        console.log("DiamondInit address: ", address(diamondInit));
-
-        // Create the `cuts` array. (Already cut DiamondCut during diamond deployment)
-        FacetCut[] memory cuts = new FacetCut[](3);
-
-        // Get function selectors for facets for `cuts` array.
         bytes4[] memory loupeSelectors = new bytes4[](5);
         loupeSelectors[0] = IDiamondLoupe.facets.selector;
         loupeSelectors[1] = IDiamondLoupe.facetFunctionSelectors.selector;
@@ -73,31 +94,49 @@ contract DeployHostIT is Script {
         accessControlSelectors[4] = IAccessControl.renounceRole.selector;
         accessControlSelectors[5] = AccessControlFacet.setRoleAdmin.selector;
 
-        bytes4[] memory w3lc2024Selectors = new bytes4[](2);
-        // w3lc2024Selectors[0] = W3LC2024Facet.setW3LC32024NFT.selector;
-        w3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
+        bytes4[] memory addW3lc2024Selectors = new bytes4[](7);
+        addW3lc2024Selectors[0] = W3LC2024Facet.setW3LC2024NFT.selector;
+        addW3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__setDayActive.selector;
+        addW3lc2024Selectors[2] = W3LC2024Facet.w3lc2024__setDayInactive.selector;
+        addW3lc2024Selectors[3] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+        addW3lc2024Selectors[4] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
+        addW3lc2024Selectors[5] = W3LC2024Facet.w3lc2024__returnAttendance.selector;
+        addW3lc2024Selectors[6] = W3LC2024Facet.w3lc2024__isDayActive.selector;
 
         // Populate the `cuts` array with the needed data.
-        cuts[0] = FacetCut({facetAddress: address(diamondLoupeFacet), action: FacetCutAction.Add, functionSelectors: loupeSelectors});
+        initCut[0] = FacetCut({facetAddress: address(diamondCutFacet), action: FacetCutAction.Add, functionSelectors: initCutSelectors});
 
-        cuts[1] = FacetCut({facetAddress: address(accessControlFacet), action: FacetCutAction.Add, functionSelectors: accessControlSelectors});
+        initCut[1] = FacetCut({facetAddress: address(diamondLoupeFacet), action: FacetCutAction.Add, functionSelectors: loupeSelectors});
 
-        cuts[2] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: w3lc2024Selectors});
+        initCut[2] = FacetCut({facetAddress: address(accessControlFacet), action: FacetCutAction.Add, functionSelectors: accessControlSelectors});
 
-        // Upgrade our diamond with the remaining facets by making the cuts. Must be owner!
-        IDiamondCut(address(diamond)).diamondCut(cuts, address(0), "");
+        initCut[3] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
 
-        // console.log("Diamond cuts complete. Owner of Diamond:", IAccessControl(address(diamond)).getRoleAdmin(LibDiamond.DIAMOND_ADMIN_ROLE));
+        // Build the DiamondArgs.
+        DiamondArgs memory initDiamondArgs = DiamondArgs({
+            init: address(diamondInit),
+            // NOTE: "interfaceId" can be used since "init" is the only function in IDiamondInit.
+            initCalldata: abi.encode(type(IDiamondInit).interfaceId)
+        });
+
+        // Deploy the diamond.
+        console.log("Message sender", msg.sender);
+        diamond = new HostIT(msg.sender, initCut, initDiamondArgs);
+        console.log("HostIT address: ", address(diamond));
+        console.log("DiamondInit address: ", address(diamondInit));
+
+        grantDiamondAdminRole();
+
+        grantBackendAdminRole();
+
+        setSetW3LC2024NFT();
 
         vm.stopBroadcast();
     }
 }
 
-
-
 contract UpdateW3LC2024Facet is Script {
     function run() external {
-        
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
         vm.startBroadcast(privateKey);
@@ -130,7 +169,6 @@ contract UpdateW3LC2024Facet is Script {
 
 contract ReplaceW3LC2024Facet is Script {
     function run() external {
-        
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
         vm.startBroadcast(privateKey);
@@ -152,7 +190,6 @@ contract ReplaceW3LC2024Facet is Script {
 
 contract Replace2W3LC2024Facet is Script {
     function run() external {
-        
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
         vm.startBroadcast(privateKey);
@@ -191,7 +228,7 @@ contract Replace2W3LC2024Facet is Script {
     }
 }
 
-contract SetW3LC2024 is Script{
+contract SetW3LC2024 is Script {
     function run() external {
         uint256 privateKey = vm.envUint("ANVIL_PRIVATE_KEY");
         vm.startBroadcast(privateKey);

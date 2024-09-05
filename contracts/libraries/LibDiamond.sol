@@ -7,11 +7,7 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 import {IDiamondCut, FacetCut, FacetCutAction} from "../interfaces/IDiamondCut.sol";
 import {IAccessControl} from "../interfaces/IAccessControl.sol";
-
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-
-error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
+import {Errors} from "./constants/Errors.sol";
 
 // This is used in diamond constructor
 // more arguments are added to this struct
@@ -26,7 +22,8 @@ library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
     // roles
-    bytes32 constant DIAMOND_ADMIN_ROLE = 0x00;
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant DIAMOND_ADMIN_ROLE = keccak256("DIAMOND_ADMIN_ROLE");
     bytes32 constant W3LC3_ADMIN_ROLE = keccak256("W3LC3_ADMIN_ROLE");
 
     struct RoleData {
@@ -359,7 +356,7 @@ library LibDiamond {
                     revert(add(32, error), returndata_size)
                 }
             } else {
-                revert InitializationFunctionReverted(_init, _calldata);
+                revert Errors.InitializationFunctionReverted(_init, _calldata);
             }
         }
     }

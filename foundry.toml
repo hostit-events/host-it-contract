@@ -9,6 +9,7 @@ optimizer = true
 optimizer_runs = 20_000
 via_ir = true
 names = true
+sizes = true
 
 [rpc_endpoints]
 lisk-sepolia = "${LISK_SEPOLIA_RPC_URL}"

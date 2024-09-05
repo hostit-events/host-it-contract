@@ -1,49 +1,189 @@
-// // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
 
-// import {Test, console} from "forge-std/Test.sol";
-// import {StdCheats} from "forge-std/StdCheats.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
 
-// import {HostIT} from "../../contracts/HostIT.sol";
-// import {DiamondInit} from "../../contracts/upgradeInitializers/DiamondInit.sol";
+import {HostIT} from "contracts/HostIT.sol";
+import {DiamondInit} from "contracts/upgradeInitializers/DiamondInit.sol";
 
-// import {DiamondCutFacet} from "../../contracts/facets/DiamondCutFacet.sol";
-// import {DiamondLoupeFacet} from "../../contracts/facets/DiamondLoupeFacet.sol";
-// import {AccessControlFacet} from "../../contracts/facets/AccessControlFacet.sol";
+import {DiamondCutFacet} from "contracts/facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "contracts/facets/DiamondLoupeFacet.sol";
+import {AccessControlFacet} from "contracts/facets/AccessControlFacet.sol";
+import {W3LC2024Facet} from "contracts/facets/W3LC2024Facet.sol";
 
-// import {IDiamondCut, FacetCut, FacetCutAction} from "../../contracts/interfaces/IDiamondCut.sol";
-// import {IDiamondLoupe} from "../../contracts/interfaces/IDiamondLoupe.sol";
-// import {IAccessControl} from "../../contracts/interfaces/IAccessControl.sol";
-// import {IERC165} from "../../contracts/interfaces/IERC165.sol";
+import {IDiamondCut, FacetCut, FacetCutAction} from "contracts/interfaces/IDiamondCut.sol";
+import {IDiamondInit} from "../../contracts/interfaces/IDiamondInit.sol";
+import {IDiamondLoupe} from "contracts/interfaces/IDiamondLoupe.sol";
+import {IAccessControl} from "contracts/interfaces/IAccessControl.sol";
+import {IERC165} from "contracts/interfaces/IERC165.sol";
 
-// import {LibDiamond} from "../../contracts/libraries/LibDiamond.sol";
+import {LibDiamond, DiamondArgs} from "contracts/libraries/LibDiamond.sol";
+// import {LibApp} from "contracts/libraries/LibApp.sol";
 
-// // import {FacetWithAppStorage} from "../../contracts/facets/FacetWithAppStorage.sol";
-// // import {FacetWithAppStorage2, ExampleEnum} from "../../contracts/facets/FacetWithAppStorage2.sol";
+import {W3LC2024Upgradeable} from "contracts/w3lc2024/W3LC2024Upgradeable.sol";
 
-// // import {ERC20Facet} from "../../contracts/facets/ERC20Facet.sol";
-// // import {IERC20Facet} from "../../contracts/interfaces/IERC20Facet.sol";
-// // import {ERC1155Facet} from "../../contracts/facets/ERC1155Facet.sol";
-// // import {IERC1155Facet} from "../../contracts/interfaces/IERC1155Facet.sol";
+contract DiamondUnitTest is Test {
+    HostIT diamond;
+    DiamondInit diamondInit;
 
-// contract DiamondUnitTest is Test {
+    DiamondCutFacet diamondCutFacet;
+    DiamondLoupeFacet diamondLoupeFacet;
+    AccessControlFacet accessControlFacet;
 
-//     HostIT diamond;
-//     DiamondInit diamondInit;
-//     DiamondCutFacet diamondCutFacet;
-//     DiamondLoupeFacet diamondLoupeFacet;
-//     OwnershipFacet ownershipFacet;
-//     AccessControlFacet accessControlFacet;
+    IDiamondLoupe ILoupe;
+    IDiamondCut ICut;
 
-//     IDiamondLoupe ILoupe;
-//     IDiamondCut ICut;
+    W3LC2024Facet w3lc2024Facet;
 
-//     // Test1Facet test1Facet;
-//     // FacetWithAppStorage facetWithAppStorage;
-//     // FacetWithAppStorage2 facetWithAppStorage2;
+    W3LC2024Upgradeable w3lc2024Upgradeable;
 
-//     // ERC20Facet erc20Facet;
-//     // ERC1155Facet erc1155Facet;
+    address diamondAdmin = address(0x1337DAD);
+    address alice = address(0xA11C3);
+    address bob = address(0xB0B);
+
+    address[] facetAddressList;
+
+    function setUp() public {
+        // Deploy core diamond template contracts
+        diamondInit = new DiamondInit();
+        diamondCutFacet = new DiamondCutFacet();
+        diamondLoupeFacet = new DiamondLoupeFacet();
+        accessControlFacet = new AccessControlFacet();
+        w3lc2024Facet = new W3LC2024Facet();
+
+        DiamondArgs memory initDiamondArgs = DiamondArgs({
+            init: address(diamondInit),
+            // NOTE: "interfaceId" can be used since "init" is the only function in IDiamondInit.
+            initCalldata: abi.encode(type(IDiamondInit).interfaceId)
+        });
+
+        FacetCut[] memory initCut = new FacetCut[](4);
+
+        bytes4[] memory initCutSelectors = new bytes4[](1);
+        initCutSelectors[0] = IDiamondCut.diamondCut.selector;
+
+        bytes4[] memory loupeSelectors = new bytes4[](5);
+        loupeSelectors[0] = IDiamondLoupe.facets.selector;
+        loupeSelectors[1] = IDiamondLoupe.facetFunctionSelectors.selector;
+        loupeSelectors[2] = IDiamondLoupe.facetAddresses.selector;
+        loupeSelectors[3] = IDiamondLoupe.facetAddress.selector;
+        loupeSelectors[4] = IERC165.supportsInterface.selector;
+
+        bytes4[] memory accessControlSelectors = new bytes4[](6);
+        accessControlSelectors[0] = IAccessControl.hasRole.selector;
+        accessControlSelectors[1] = IAccessControl.getRoleAdmin.selector;
+        accessControlSelectors[2] = IAccessControl.grantRole.selector;
+        accessControlSelectors[3] = IAccessControl.revokeRole.selector;
+        accessControlSelectors[4] = IAccessControl.renounceRole.selector;
+        accessControlSelectors[5] = AccessControlFacet.setRoleAdmin.selector;
+
+        bytes4[] memory addW3lc2024Selectors = new bytes4[](7);
+        addW3lc2024Selectors[0] = W3LC2024Facet.setW3LC2024NFT.selector;
+        addW3lc2024Selectors[1] = W3LC2024Facet.w3lc2024__setDayActive.selector;
+        addW3lc2024Selectors[2] = W3LC2024Facet.w3lc2024__setDayInactive.selector;
+        addW3lc2024Selectors[3] = W3LC2024Facet.w3lc2024__markAttendance.selector;
+        addW3lc2024Selectors[4] = W3LC2024Facet.w3lc2024__verifyAttendance.selector;
+        addW3lc2024Selectors[5] = W3LC2024Facet.w3lc2024__returnAttendance.selector;
+        addW3lc2024Selectors[6] = W3LC2024Facet.w3lc2024__isDayActive.selector;
+
+        initCut[0] = FacetCut({facetAddress: address(diamondCutFacet), action: FacetCutAction.Add, functionSelectors: initCutSelectors});
+
+        initCut[1] = FacetCut({facetAddress: address(diamondLoupeFacet), action: FacetCutAction.Add, functionSelectors: loupeSelectors});
+
+        initCut[2] = FacetCut({facetAddress: address(accessControlFacet), action: FacetCutAction.Add, functionSelectors: accessControlSelectors});
+
+        initCut[3] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
+
+        vm.startPrank(diamondAdmin);
+        console.log("Diamond Admin: ", address(diamondAdmin));
+        console.log("Msg.sender: ", msg.sender);
+        diamond = new HostIT(msg.sender, initCut, initDiamondArgs);
+        vm.stopPrank();
+
+        facetAddressList = IDiamondLoupe(address(diamond)).facetAddresses(); // save all facet addresses
+
+        // Set interfaces for less verbose diamond interactions.
+        ILoupe = IDiamondLoupe(address(diamond));
+        ICut = IDiamondCut(address(diamond));
+    }
+
+    function test_Deployment() public view {
+
+        // All 3 facets have been added to the diamond, and are not 0x0 address.
+        assertEq(facetAddressList.length, 4, "Cut, Loupe, AccessControl, W3LC2024");
+        assertNotEq(facetAddressList[0], address(0), "Not 0x0 address");
+        assertNotEq(facetAddressList[1], address(0), "Not 0x0 address");
+        assertNotEq(facetAddressList[2], address(0), "Not 0x0 address");
+        assertNotEq(facetAddressList[3], address(0), "Not 0x0 address");
+
+        // Owner is set correctly?
+        // assertEq(IERC173(address(diamond)).owner(), diamondOwner, "Diamond owner set properly");
+
+        // Interface support set to true during `init()` call during Diamond upgrade?
+        assertTrue(IERC165(address(diamond)).supportsInterface(type(IERC165).interfaceId), "IERC165");
+        assertTrue(IERC165(address(diamond)).supportsInterface(type(IDiamondCut).interfaceId), "Cut");
+        assertTrue(IERC165(address(diamond)).supportsInterface(type(IDiamondLoupe).interfaceId), "Loupe");
+
+        // Facets have the correct function selectors?
+        bytes4[] memory loupeViewCut = ILoupe.facetFunctionSelectors(facetAddressList[0]); // DiamondCut
+        bytes4[] memory loupeViewLoupe = ILoupe.facetFunctionSelectors(facetAddressList[1]); // Loupe
+        bytes4[] memory loupeViewAccessControl = ILoupe.facetFunctionSelectors(facetAddressList[2]); // AccessControl
+        bytes4[] memory loupeViewW3lc2024 = ILoupe.facetFunctionSelectors(facetAddressList[3]); // W3LC2024
+
+        assertEq(loupeViewCut[0], IDiamondCut.diamondCut.selector, "should match");
+
+        assertEq(loupeViewLoupe[0], IDiamondLoupe.facets.selector, "should match");
+        assertEq(loupeViewLoupe[1], IDiamondLoupe.facetFunctionSelectors.selector, "should match");
+        assertEq(loupeViewLoupe[2], IDiamondLoupe.facetAddresses.selector, "should match");
+        assertEq(loupeViewLoupe[3], IDiamondLoupe.facetAddress.selector, "should match");
+        assertEq(loupeViewLoupe[4], IERC165.supportsInterface.selector, "should match");
+        
+        assertEq(loupeViewAccessControl[0], IAccessControl.hasRole.selector, "should match");
+        assertEq(loupeViewAccessControl[1], IAccessControl.getRoleAdmin.selector, "should match");
+        assertEq(loupeViewAccessControl[2], IAccessControl.grantRole.selector, "should match");
+        assertEq(loupeViewAccessControl[3], IAccessControl.revokeRole.selector, "should match");
+        assertEq(loupeViewAccessControl[4], IAccessControl.renounceRole.selector, "should match");
+        assertEq(loupeViewAccessControl[5], AccessControlFacet.setRoleAdmin.selector, "should match");
+
+        assertEq(loupeViewW3lc2024[0], W3LC2024Facet.setW3LC2024NFT.selector, "should match");
+        assertEq(loupeViewW3lc2024[1], W3LC2024Facet.w3lc2024__setDayActive.selector, "should match");
+        assertEq(loupeViewW3lc2024[2], W3LC2024Facet.w3lc2024__setDayInactive.selector, "should match");
+        assertEq(loupeViewW3lc2024[3], W3LC2024Facet.w3lc2024__markAttendance.selector, "should match");
+        assertEq(loupeViewW3lc2024[4], W3LC2024Facet.w3lc2024__verifyAttendance.selector, "should match");
+        assertEq(loupeViewW3lc2024[5], W3LC2024Facet.w3lc2024__returnAttendance.selector, "should match");
+        assertEq(loupeViewW3lc2024[6], W3LC2024Facet.w3lc2024__isDayActive.selector, "should match");
+
+        // Function selectors are associated with the correct facets?
+        assertEq(facetAddressList[0], ILoupe.facetAddress(IDiamondCut.diamondCut.selector), "should match");
+
+        assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facets.selector), "should match");
+        assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facetFunctionSelectors.selector), "should match");
+        assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facetAddresses.selector), "should match");
+        assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facetAddress.selector), "should match");
+        assertEq(facetAddressList[1], ILoupe.facetAddress(IERC165.supportsInterface.selector), "should match");
+
+        assertEq(facetAddressList[2], ILoupe.facetAddress(IAccessControl.hasRole.selector), "should match");
+        assertEq(facetAddressList[2], ILoupe.facetAddress(IAccessControl.getRoleAdmin.selector), "should match");
+        assertEq(facetAddressList[2], ILoupe.facetAddress(IAccessControl.grantRole.selector), "should match");
+        assertEq(facetAddressList[2], ILoupe.facetAddress(IAccessControl.revokeRole.selector), "should match");
+        assertEq(facetAddressList[2], ILoupe.facetAddress(IAccessControl.renounceRole.selector), "should match");
+        assertEq(facetAddressList[2], ILoupe.facetAddress(AccessControlFacet.setRoleAdmin.selector), "should match");
+
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.setW3LC2024NFT.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__setDayActive.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__setDayInactive.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__markAttendance.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__verifyAttendance.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__returnAttendance.selector), "should match");
+        assertEq(facetAddressList[3], ILoupe.facetAddress(W3LC2024Facet.w3lc2024__isDayActive.selector), "should match");
+    }
+
+    function test_W3lc2024Nft() public {
+        w3lc2024Upgradeable = new W3LC2024Upgradeable();
+        console.log(address(w3lc2024Upgradeable));
+    }
+}
 
 //     address diamondOwner = address(0x1337DAD);
 //     address alice = address(0xA11C3);
@@ -65,7 +205,7 @@
 //         });
 
 //         diamond = new HostIT(diamondOwner, cuts, args);
-        
+
 //         // Create the `cuts` array. (Already cut DiamondCut during diamond deployment)
 //         FacetCut[] memory cuts = new FacetCut[](3);
 
@@ -78,7 +218,7 @@
 //         loupeSelectors[4] = IERC165.supportsInterface.selector;
 
 //         bytes4[] memory ownershipSelectors = new bytes4[](2);
-//         ownershipSelectors[0] = IERC173.owner.selector; 
+//         ownershipSelectors[0] = IERC173.owner.selector;
 //         ownershipSelectors[1] = IERC173.transferOwnership.selector;
 
 //         bytes4[] memory accessControlSelectors = new bytes4[](5);
@@ -119,7 +259,6 @@
 //         ICut = IDiamondCut(address(diamond));
 //     }
 
-
 //     function test_Deployment() public view {
 
 //         // All 3 facets have been added to the diamond, and are not 0x0 address.
@@ -141,7 +280,7 @@
 //         assertTrue(IERC165(address(diamond)).supportsInterface(0xd9b67a26), "IERC1155");
 //         assertTrue(IERC165(address(diamond)).supportsInterface(0x0e89341c), "IERC1155MetadataURI");
 
-//         // Facets have the correct function selectors?     
+//         // Facets have the correct function selectors?
 //         bytes4[] memory loupeViewCut = ILoupe.facetFunctionSelectors(facetAddressList[0]); // DiamondCut
 //         bytes4[] memory loupeViewLoupe = ILoupe.facetFunctionSelectors(facetAddressList[1]); // Loupe
 //         bytes4[] memory loupeViewOwnership = ILoupe.facetFunctionSelectors(facetAddressList[2]); // Ownership
@@ -153,7 +292,7 @@
 //         assertEq(loupeViewLoupe[4], IERC165.supportsInterface.selector, "should match");
 //         assertEq(loupeViewOwnership[0], IERC173.owner.selector, "should match");
 //         assertEq(loupeViewOwnership[1], IERC173.transferOwnership.selector, "should match");
-    
+
 //         // Function selectors are associated with the correct facets?
 //         assertEq(facetAddressList[0], ILoupe.facetAddress(IDiamondCut.diamondCut.selector), "should match");
 //         assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facets.selector), "should match");
@@ -162,7 +301,7 @@
 //         assertEq(facetAddressList[1], ILoupe.facetAddress(IDiamondLoupe.facetAddress.selector), "should match");
 //         assertEq(facetAddressList[1], ILoupe.facetAddress(IERC165.supportsInterface.selector), "should match");
 //         assertEq(facetAddressList[2], ILoupe.facetAddress(IERC173.owner.selector), "should match");
-//         assertEq(facetAddressList[2], ILoupe.facetAddress(IERC173.transferOwnership.selector), "should match");   
+//         assertEq(facetAddressList[2], ILoupe.facetAddress(IERC173.transferOwnership.selector), "should match");
 //     }
 
 //     // Tests Add, Replace, and Remove functionality for ExampleFacet
@@ -208,11 +347,11 @@
 //         // assertEq(loupeViewExample[4], Test1Facet.test1Func5.selector, "should match");
 
 //         // // Function selectors are associated with the correct facet.
-//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func1.selector), "should match");  
-//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func2.selector), "should match"); 
-//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func3.selector), "should match"); 
-//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func4.selector), "should match"); 
-//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func5.selector), "should match"); 
+//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func1.selector), "should match");
+//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func2.selector), "should match");
+//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func3.selector), "should match");
+//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func4.selector), "should match");
+//         // assertEq(facetAddressList[3], ILoupe.facetAddress(Test1Facet.test1Func5.selector), "should match");
 
 //         // // We can successfully call the ExampleFacet functions.
 //         // Test1Facet(address(diamond)).test1Func1();
@@ -240,7 +379,7 @@
 //         // // The exampleFunction1 now lives in ownershipFacet and not ExampleFacet.
 //         // assertEq(address(ownershipFacet), ILoupe.facetAddress(Test1Facet.test1Func1.selector));
 
-//         // // Double checking, the Ownership facet now has the new function selector     
+//         // // Double checking, the Ownership facet now has the new function selector
 //         // bytes4[] memory loupeViewOwnership = ILoupe.facetFunctionSelectors(facetAddressList[2]); // Ownership
 //         // assertEq(loupeViewOwnership[0], IERC173.owner.selector, "should match");
 //         // assertEq(loupeViewOwnership[1], IERC173.transferOwnership.selector, "should match");
@@ -249,7 +388,7 @@
 //         // // The ExampleFacet no longer has access to the exampleFunction1
 //         // vm.expectRevert();
 //         // Test1Facet(address(diamond)).test1Func1();
-    
+
 //         // // We can also remove functions completely by housing them in 0x0.
 //         // bytes4[] memory selectorsToRemove = new bytes4[](2);
 //         // selectorsToRemove[0] = Test1Facet.test1Func2.selector;
@@ -284,13 +423,13 @@
 
 //     // Deploying & Cutting ERC20Facet, state updates, transfers, approval, error emission, event emission.
 //     // function test_ERC20() public {
-        
+
 //     //     erc20Facet = new ERC20Facet();
 
 //     //     FacetCut[] memory cut = new FacetCut[](1);
 
 //     //     bytes4[] memory selectors = new bytes4[](11);
-//     //     selectors[0] = IERC20Facet.initialize.selector; 
+//     //     selectors[0] = IERC20Facet.initialize.selector;
 //     //     selectors[1] = IERC20Facet.name.selector;
 //     //     selectors[2] = IERC20Facet.symbol.selector;
 //     //     selectors[3] = IERC20Facet.decimals.selector;
@@ -322,13 +461,13 @@
 
 //     //     // Only owner can initialize
 //     //     vm.startPrank(diamondOwner);
-//     //     erc20.initialize(1000000e18, "MyERC20Facet", "MERC20F"); 
+//     //     erc20.initialize(1000000e18, "MyERC20Facet", "MERC20F");
 //     //     assertEq(erc20.name(), "MyERC20Facet", "should be name");
 //     //     assertEq(erc20.symbol(), "MERC20F", "should be symbol");
 //     //     assertEq(erc20.decimals(), 18, "should be 18 decimals");
 //     //     assertEq(erc20.totalSupply(), 1000000e18, "initial supply should be 1M");
 //     //     assertEq(erc20.balanceOf(diamondOwner), 1000000e18, "owner should have initial supply");
-        
+
 //     //     // Nobody can re-initialize
 //     //     vm.expectRevert();
 //     //     erc20.initialize(1337e18, "TokenName", "TKN"); // Cannot re-initialize
@@ -374,16 +513,15 @@
 //     //     // Then everything appears to be in good working order.
 //     // }
 
-
 //     // Deploying & Cutting ERC1155Facet, state updates, transfers, approval, error emission, event emission.
 //     // function test_ERC1155() public {
-        
+
 //     //     erc1155Facet = new ERC1155Facet();
 
 //     //     FacetCut[] memory cut = new FacetCut[](1);
 
 //     //     bytes4[] memory selectors = new bytes4[](12);
-//     //     selectors[0] = IERC1155Facet.initialize.selector; 
+//     //     selectors[0] = IERC1155Facet.initialize.selector;
 //     //     selectors[1] = IERC1155Facet.setURI.selector;
 //     //     selectors[2] = IERC1155Facet.mint.selector;
 //     //     selectors[3] = IERC1155Facet.uri.selector;
@@ -402,7 +540,6 @@
 //     //         functionSelectors: selectors
 //     //     });
 
-
 //     //     vm.prank(diamondOwner);
 //     //     ICut.diamondCut(cut, address(0x0), "");
 //     //     facetAddressList = IDiamondLoupe(address(diamond)).facetAddresses(); // save all facet addresses
@@ -418,7 +555,7 @@
 
 //     //     // Only owner can initialize
 //     //     vm.startPrank(diamondOwner);
-//     //     erc1155.initialize("MyERC1155URIString"); 
+//     //     erc1155.initialize("MyERC1155URIString");
 //     //     assertEq(erc1155.uri(0), "MyERC1155URIString", "should be name");
 
 //     //     // Nobody can re-initialize
@@ -467,7 +604,6 @@
 //     //     // Once we see the functions work, AppStorage updates, errors, and events are emitting properly
 //     //     // Then everything appears to be in good working order.
 
-
 //     //     // Deploy FWAS2 to test no storage collisions with AppStorage and OZ ERC1155 inheritance
 //     //     // We thwart the AppStorage collisions with AppStorageRoot contract in AppStorage
 //     //     // Forcing the AppStorage to always be at slot 0 of a contract.
@@ -477,11 +613,11 @@
 
 //     //     bytes4[] memory selector = new bytes4[](6);
 //     //     selector[0] = FacetWithAppStorage2.getFirstVar.selector;
-//     //     selector[1] = FacetWithAppStorage2.changeNestedStruct.selector; 
-//     //     selector[2] = FacetWithAppStorage2.changeUnprotectedNestedStruct.selector; 
-//     //     selector[3] = FacetWithAppStorage2.viewNestedStruct.selector; 
-//     //     selector[4] = FacetWithAppStorage2.viewUnprotectedNestedStruct.selector; 
-//     //     selector[5] = FacetWithAppStorage2.getNumber.selector; 
+//     //     selector[1] = FacetWithAppStorage2.changeNestedStruct.selector;
+//     //     selector[2] = FacetWithAppStorage2.changeUnprotectedNestedStruct.selector;
+//     //     selector[3] = FacetWithAppStorage2.viewNestedStruct.selector;
+//     //     selector[4] = FacetWithAppStorage2.viewUnprotectedNestedStruct.selector;
+//     //     selector[5] = FacetWithAppStorage2.getNumber.selector;
 
 //     //     cut2[0] = FacetCut({
 //     //         facetAddress: address(facetWithAppStorage2),
