@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Errors {
+library Errors {
     // Diamond
     /**
      * When no function exists for function called.

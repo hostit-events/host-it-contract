@@ -10,12 +10,15 @@ optimizer_runs = 20_000
 via_ir = true
 names = true
 sizes = true
+solc_version = '0.8.26+commit.8a97fa7a'
 
 [rpc_endpoints]
+lisk = "${LISK_RPC_URL}"
 lisk-sepolia = "${LISK_SEPOLIA_RPC_URL}"
 sepolia = "${SEPOLIA_RPC_URL}"
 
 [etherscan]
+lisk = { key = "${ETHERSCAN_API_KEY}" }
 lisk-sepolia = { key = "${ETHERSCAN_API_KEY}" }
 
 [fmt]

@@ -174,19 +174,6 @@ library LibDiamond {
     }
 
     /**
-     * @dev Sets `adminRole` as ``role``'s admin role.
-     *
-     * Emits a {RoleAdminChanged} event.
-     */
-    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-        bytes32 previousAdminRole = getRoleAdmin(role);
-        ds._roles[role].adminRole = adminRole;
-        emit IAccessControl.RoleAdminChanged(role, previousAdminRole, adminRole);
-    }
-
-    /**
      * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.
      *
      * Internal function without access restriction.
