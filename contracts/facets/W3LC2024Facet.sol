@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 import {LibApp} from "../libraries/LibApp.sol";
 import {Errors} from "../libraries/constants/Errors.sol";
-import {IERC721A} from "erc721a/contracts/IERC721A.sol";
-import {W3LC2024Upgradeable} from "contracts/w3lc2024/W3LC2024Upgradeable.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
+import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
 
 contract W3LC2024Facet {
     /**
@@ -72,7 +72,7 @@ contract W3LC2024Facet {
 
         if (s.attended[attendee][day] == true) revert Errors.W3LC2024__AlreadyAttended();
 
-        if (IERC721A(s.W3LC2024NFT).balanceOf(attendee) == 0) W3LC2024Upgradeable(s.W3LC2024NFT).mintSingle(attendee);
+        if (IERC721AUpgradeable(s.W3LC2024NFT).balanceOf(attendee) == 0) W3LC2024(s.W3LC2024NFT).mintSingle(attendee);
 
         if (day == LibApp.W3LC2024AttendanceDay.Day1) {
             s.day1Attendees.push(attendee);

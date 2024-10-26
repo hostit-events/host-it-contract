@@ -14,8 +14,6 @@ import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
 import { IERC165 } from "../interfaces/IERC165.sol";
 import {IDiamondInit} from "../interfaces/IDiamondInit.sol";
 import {IAccessControl} from "../interfaces/IAccessControl.sol";
-import {IERC721A} from "erc721a/contracts/IERC721A.sol";
-
 
 // It is expected that this contract is customized if you want to deploy your diamond
 // with data from a deployment script. Use the init function to initialize state variables

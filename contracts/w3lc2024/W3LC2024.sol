@@ -81,7 +81,7 @@ import {IAccessControl} from "../interfaces/IAccessControl.sol";
  *
  * NFT Contract to mint Web3Lagos Conference 3.0 tickets to attendees
  */
-contract W3LC2024Upgradeable is ERC721AUpgradeable, AccessControlUpgradeable {
+contract W3LC2024 is ERC721AUpgradeable, AccessControlUpgradeable {
     // =============================================================
     //                       INITIALIZER LOGIC
     // =============================================================

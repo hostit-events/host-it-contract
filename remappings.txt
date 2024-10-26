@@ -1,6 +1,6 @@
 @ensdomains/=node_modules/@ensdomains/
 @openzeppelin/=node_modules/@openzeppelin/
 erc721a-upgradeable/=node_modules/erc721a-upgradeable/
-erc721a/=node_modules/erc721a/
 forge-std/=lib/forge-std/src/
+hardhat-diamond-abi/=node_modules/hardhat-diamond-abi/
 hardhat/=node_modules/hardhat/

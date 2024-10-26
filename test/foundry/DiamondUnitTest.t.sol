@@ -21,7 +21,7 @@ import {IERC165} from "contracts/interfaces/IERC165.sol";
 import {LibDiamond, DiamondArgs} from "contracts/libraries/LibDiamond.sol";
 // import {LibApp} from "contracts/libraries/LibApp.sol";
 
-import {W3LC2024Upgradeable} from "contracts/w3lc2024/W3LC2024Upgradeable.sol";
+import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
 
 contract DiamondUnitTest is Test {
     HostIT diamond;
@@ -36,7 +36,7 @@ contract DiamondUnitTest is Test {
 
     W3LC2024Facet w3lc2024Facet;
 
-    W3LC2024Upgradeable w3lc2024Upgradeable;
+    W3LC2024 w3lc2024Upgradeable;
 
     address diamondAdmin = address(0x1337DAD);
     address alice = address(0xA11C3);
@@ -180,7 +180,7 @@ contract DiamondUnitTest is Test {
     }
 
     function test_W3lc2024Nft() public {
-        w3lc2024Upgradeable = new W3LC2024Upgradeable();
+        w3lc2024Upgradeable = new W3LC2024();
         console.log(address(w3lc2024Upgradeable));
     }
 }

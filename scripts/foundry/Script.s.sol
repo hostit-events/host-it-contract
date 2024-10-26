@@ -14,13 +14,14 @@ import {IDiamondCut, FacetCut, FacetCutAction} from "../../contracts/interfaces/
 import {IDiamondInit} from "../../contracts/interfaces/IDiamondInit.sol";
 import {IDiamondLoupe} from "../../contracts/interfaces/IDiamondLoupe.sol";
 import {IAccessControl} from "../../contracts/interfaces/IAccessControl.sol";
-import {IERC721A} from "erc721a/contracts/IERC721A.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
+
 import {IERC165} from "../../contracts/interfaces/IERC165.sol";
 
 import {LibDiamond, DiamondArgs} from "../../contracts/libraries/LibDiamond.sol";
 
 import {HostIT} from "../../contracts/HostIT.sol";
-import {W3LC2024Upgradeable} from "../../contracts/w3lc2024/W3LC2024Upgradeable.sol";
+import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
 
 contract DeployHostIT is Script {
     DiamondInit diamondInit;
@@ -45,7 +46,7 @@ contract DeployHostIT is Script {
 
     function grantDiamondAdminRole() internal {
         // Grant diamond W3LC2024 NFT admin role
-        W3LC2024Upgradeable(w3lcNFT).grantRole(DEFAULT_ADMIN_ROLE, address(diamond));
+        W3LC2024(w3lcNFT).grantRole(DEFAULT_ADMIN_ROLE, address(diamond));
     }
 
     function grantBackendAdminRole() internal {
