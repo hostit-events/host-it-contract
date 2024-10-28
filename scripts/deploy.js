@@ -27,7 +27,7 @@ async function deployDiamond() {
   const DiamondArgs = { address: zeroAddress, bytes: "" }
 
   // deploy Diamond
-  const Diamond = await ethers.getContractFactory('Diamond')
+  const Diamond = await ethers.getContractFactory('HostIT')
   const diamond = await Diamond.deploy(contractOwner, initCut, DiamondArgs)
   await diamond.deployed()
   console.log('Diamond deployed:', diamond.address)
@@ -46,7 +46,8 @@ async function deployDiamond() {
   const FacetNames = [
     'DiamondLoupeFacet',
     'OwnershipFacet',
-    'AccessControlFacet'
+    'AccessControlFacet',
+    'W3LC2024Facet'
   ]
   const cut = []
   for (const FacetName of FacetNames) {

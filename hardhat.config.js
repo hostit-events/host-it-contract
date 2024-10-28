@@ -23,10 +23,12 @@ task('accounts', 'Prints the list of accounts', async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: '0.8.25',
+  solidity: '0.8.26',
   diamondAbi: {
     // (required) The name of your Diamond ABI
     name: "HostITDiamond",
+    include: ["Facet"],
+    strict: false,
   },
   networks: {
     localhost: {
