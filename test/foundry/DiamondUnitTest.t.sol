@@ -21,7 +21,7 @@ import {IERC165} from "contracts/interfaces/IERC165.sol";
 import {LibDiamond, DiamondArgs} from "contracts/libraries/LibDiamond.sol";
 // import {LibApp} from "contracts/libraries/LibApp.sol";
 
-import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
+import {W3LC2024} from "contracts/nfts/W3LC2024.sol";
 
 contract DiamondUnitTest is Test {
     HostIT diamond;
