@@ -10,3 +10,6 @@ cache_forge
 cache
 artifacts
 .env
+
+#Mac files
+.DS_Store
