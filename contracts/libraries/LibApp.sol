@@ -43,6 +43,17 @@ library LibApp {
         // Array of AW3C2024 attendees.
         address[] bdrls2024_day1Attendees;
         address[] bdrls2024_day2Attendees;
+
+        // =============================================================
+        //                      ITC2024 STORAGE
+        // =============================================================
+
+        // ITC2024 NFT address
+        address ITC2024NFT;
+        // Mapping from attendee address to ITC2024 attendance day to bool.
+        mapping(address =>  bool) itc2024_attended;
+        // Array of ITC2024 attendees.
+        address[] itc2024_attendees;
     }
 
     enum AttendanceDay {
