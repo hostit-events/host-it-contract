@@ -27,6 +27,7 @@ library LibDiamond {
     bytes32 constant W3LC3_ADMIN_ROLE = keccak256("W3LC3_ADMIN_ROLE");
     bytes32 constant AW3C_ADMIN_ROLE = keccak256("AW3C_ADMIN_ROLE");
     bytes32 constant BDRLS_ADMIN_ROLE = keccak256("BDRLS_ADMIN_ROLE");
+    bytes32 constant ITC_ADMIN_ROLE = keccak256("ITC_ADMIN_ROLE");
 
     struct RoleData {
         mapping(address => bool) hasRole;
