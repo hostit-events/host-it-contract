@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibApp} from "../libraries/LibApp.sol";
-import {Errors} from "../libraries/constants/Errors.sol";
-import {Logs} from "../libraries/constants/Logs.sol";
+import {LibDiamond} from "contracts/libraries/LibDiamond.sol";
+import {LibApp} from "contracts/libraries/LibApp.sol";
+import {Errors} from "contracts/libraries/constants/Errors.sol";
+import {Logs} from "contracts/libraries/constants/Logs.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
 import {BDRLS2024} from "contracts/nfts/BDRLS2024.sol";
 

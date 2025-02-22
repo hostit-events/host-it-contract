@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibApp} from "../libraries/LibApp.sol";
-import {Errors} from "../libraries/constants/Errors.sol";
-import {Logs} from "../libraries/constants/Logs.sol";
+import {LibDiamond} from "contracts/libraries/LibDiamond.sol";
+import {LibApp} from "contracts/libraries/LibApp.sol";
+import {Types} from "contracts/libraries/constants/Types.sol";
+import {Errors} from "contracts/libraries/constants/Errors.sol";
+import {Logs} from "contracts/libraries/constants/Logs.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
 import {W3LC2024} from "contracts/nfts/W3LC2024.sol";
 
@@ -30,7 +31,7 @@ contract W3LC2024Facet {
      *
      * - msg.sender must have the role `W3LC3_ADMIN_ROLE`.
      */
-    function w3lc2024__setDayActive(LibApp.AttendanceDay day) external {
+    function w3lc2024__setDayActive(Types.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
@@ -44,7 +45,7 @@ contract W3LC2024Facet {
      *
      * - msg.sender must have the role `W3LC3_ADMIN_ROLE`.
      */
-    function w3lc2024__setDayInactive(LibApp.AttendanceDay day) external {
+    function w3lc2024__setDayInactive(Types.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
@@ -65,7 +66,7 @@ contract W3LC2024Facet {
      *
      * Emits an {AttendedW3LC2024} event.
      */
-    function w3lc2024__markAttendance(address attendee, LibApp.AttendanceDay day) external {
+    function w3lc2024__markAttendance(address attendee, Types.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
@@ -119,7 +120,7 @@ contract W3LC2024Facet {
      * @dev Returns if day is active.
      *
      */
-    function w3lc2024__isDayActive(LibApp.AttendanceDay day) external view returns (bool) {
+    function w3lc2024__isDayActive(Types.AttendanceDay day) external view returns (bool) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
         return s.w3lc2024_isDayActive[day];
