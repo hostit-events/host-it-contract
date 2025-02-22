@@ -5,7 +5,6 @@ import {LibDiamond} from "contracts/libraries/LibDiamond.sol";
 import {LibApp} from "contracts/libraries/LibApp.sol";
 import {Errors} from "contracts/libraries/constants/Errors.sol";
 import {Logs} from "contracts/libraries/constants/Logs.sol";
-import {Types} from "contracts/libraries/constants/Types.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
 import {ITC2024} from "contracts/nfts/ITC2024.sol";
 
@@ -38,7 +37,7 @@ contract ITC2024Facet {
      *
      * Emits an {AttendedITC2024} event.
      */
-    function itc2024__markAttendance(address attendee, Types.AttendanceDay day) external {
+    function itc2024__markAttendance(address attendee, LibApp.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.ITC_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
@@ -60,7 +59,7 @@ contract ITC2024Facet {
      *
      * - `msg.sender` must have the role `ITC_ADMIN_ROLE`.
      */
-    function itc2024__verifyAttendance(address attendee, Types.AttendanceDay day) public view returns (bool) {
+    function itc2024__verifyAttendance(address attendee, LibApp.AttendanceDay day) public view returns (bool) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
         return s.itc2024_attended[attendee];
