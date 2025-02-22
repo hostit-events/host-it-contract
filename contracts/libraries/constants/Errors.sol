@@ -68,4 +68,21 @@ library Errors {
      * Mint failed.
      */
     error BDRLS2024__UnableToMint();
+
+    /**
+     * The attendee has already been registered.
+     */
+    error ITC2024__AlreadyAttended(uint8);
+
+    // Event Errors
+    /**
+     * Insufficient funds to pay for registration.
+     */
+    error Event__InsufficientFunds();
+    error Event__PaymentApprovalFailed();
+    error Event__PaymentTransferFailed();
+    error Event__NoTicketBalance(uint256);
+    error Event__AlreadyAttendedDay(uint256, uint8);
+    error Event__InvalidPaymentMethod();
+    error Event__AddressZeroOrganizer();
 }
