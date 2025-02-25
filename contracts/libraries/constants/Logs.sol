@@ -2,16 +2,16 @@
 pragma solidity ^0.8.0;
 
 import {LibApp} from "../LibApp.sol";
-import {Types} from "./Types.sol";
+import "./Types.sol";
 
 library Logs {
     // =============================================================
     //                   EVENT STORAGE EVENTS/LOGS
     // =============================================================
-    event EventCreated(uint256 eventId, Types.EventData eventData);
-    event EventUpdated(uint256 eventId, Types.EventData eventData);
-    event AttendeeRegistered(uint256 eventId, address attendee);
-    event AttendeeCheckedIn(uint256 eventId, address attendee);
+    event EventCreated(uint256 indexed eventId, EventData eventData);
+    event EventUpdated(uint256 indexed eventId, EventData eventData);
+    event AttendeeRegistered(uint256 indexed eventId, address attendee);
+    event AttendeeCheckedIn(uint256 indexed eventId, address attendee);
 
     // =============================================================
     //                      MANUAL EVENTS/LOGS
