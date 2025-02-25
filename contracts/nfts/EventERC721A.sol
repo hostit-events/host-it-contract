@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {ERC721AUpgradeable} from "./ERC721AUpgradeable.sol";
+import {ERC721AStorage} from "./ERC721AStorage.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
@@ -27,6 +28,17 @@ contract EventERC721A is ERC721AUpgradeable, AccessControlUpgradeable, PausableU
     // =============================================================
     //                       NFT METADATA
     // =============================================================
+
+    /**
+     * @dev Sets the Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`.
+     */
+    function setNameAndSymbol(string calldata _name, string calldata _symbol) external {
+        _checkRole(DEFAULT_ADMIN_ROLE);
+        ERC721AStorage.Layout storage $ = ERC721AStorage.layout();
+        $._name = _name;
+        $._symbol = _symbol;
+    }
 
     /**
      * @dev Sets the Base URI for computing {tokenURI}. If set, the resulting URI for each
