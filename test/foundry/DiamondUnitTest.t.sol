@@ -10,7 +10,7 @@ import {DiamondInit} from "contracts/upgradeInitializers/DiamondInit.sol";
 import {DiamondCutFacet} from "contracts/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "contracts/facets/DiamondLoupeFacet.sol";
 import {AccessControlFacet} from "contracts/facets/AccessControlFacet.sol";
-import {W3LC2024Facet} from "contracts/facets/past_events/W3LC2024Facet.sol";
+import {W3LC2024Facet} from "contracts/facets/standalone_events/W3LC2024Facet.sol";
 
 import {IDiamondCut, FacetCut, FacetCutAction} from "contracts/interfaces/IDiamondCut.sol";
 import {IDiamondInit} from "../../contracts/interfaces/IDiamondInit.sol";
