@@ -10,7 +10,7 @@ import {DiamondInit} from "contracts/upgradeInitializers/DiamondInit.sol";
 import {DiamondCutFacet} from "contracts/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "contracts/facets/DiamondLoupeFacet.sol";
 import {AccessControlFacet} from "contracts/facets/AccessControlFacet.sol";
-import {W3LC2024Facet} from "contracts/facets/W3LC2024Facet.sol";
+import {W3LC2024Facet} from "contracts/facets/standalone_events/W3LC2024Facet.sol";
 
 import {IDiamondCut, FacetCut, FacetCutAction} from "contracts/interfaces/IDiamondCut.sol";
 import {IDiamondInit} from "../../contracts/interfaces/IDiamondInit.sol";
@@ -21,7 +21,7 @@ import {IERC165} from "contracts/interfaces/IERC165.sol";
 import {LibDiamond, DiamondArgs} from "contracts/libraries/LibDiamond.sol";
 // import {LibApp} from "contracts/libraries/LibApp.sol";
 
-import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
+import {W3LC2024} from "contracts/nfts/W3LC2024.sol";
 
 contract DiamondUnitTest is Test {
     HostIT diamond;

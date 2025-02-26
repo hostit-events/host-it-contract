@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 library LibApp {
-    event AttendedW3LC2024(address indexed attendee, W3LC2024AttendanceDay indexed day, uint256 time);
     struct AppStorage {
         // =============================================================
         //                      W3LC2024 STORAGE
@@ -12,19 +11,56 @@ library LibApp {
         address W3LC2024NFT;
         // W3LC2024 URI
         string _uri;
-        mapping(W3LC2024AttendanceDay => bool) isDayActive;
+        mapping(AttendanceDay => bool) w3lc2024_isDayActive;
         // Mapping from attendee address to W3LC2024 attendance day to bool.
-        mapping(address => mapping(W3LC2024AttendanceDay => bool)) attended;
+        mapping(address => mapping(AttendanceDay => bool)) w3lc2024_attended;
         // Array of W3LC2024 attendees.
-        address[] day1Attendees;
-        address[] day2Attendees;
-        address[] day3Attendees;
+        address[] w3lc2024_day1Attendees;
+        address[] w3lc2024_day2Attendees;
+        address[] w3lc2024_day3Attendees;
+
+        // =============================================================
+        //                      AW3C2024 STORAGE
+        // =============================================================
+
+        // AW3C2024 NFT address
+        address AW3C2024NFT;
+        // mapping(AttendanceDay => bool) aw3c2024_isDayActive;
+        // Mapping from attendee address to AW3C2024 attendance day to bool.
+        mapping(address =>  bool) aw3c2024_attended;
+        // Array of AW3C2024 attendees.
+        address[] aw3c2024_attendees;
+
+        // =============================================================
+        //                      BDRLS2024 STORAGE
+        // =============================================================
+
+        // BDRLS2024 NFT address
+        address BDRLS2024NFT;
+        mapping(AttendanceDay => bool) bdrls2024_isDayActive;
+        // Mapping from attendee address to BDRLS2024 attendance day to bool.
+        mapping(address => mapping(AttendanceDay => bool)) bdrls2024_attended;
+        // Array of AW3C2024 attendees.
+        address[] bdrls2024_day1Attendees;
+        address[] bdrls2024_day2Attendees;
+
+        // =============================================================
+        //                      ITC2024 STORAGE
+        // =============================================================
+
+        // ITC2024 NFT address
+        address ITC2024NFT;
+        // Mapping from attendee address to ITC2024 attendance day to bool.
+        mapping(address =>  bool) itc2024_attended;
+        // Array of ITC2024 attendees.
+        address[] itc2024_attendees;
     }
 
-    enum W3LC2024AttendanceDay {
-        Day1, // Day1=0
-        Day2, // Day2=1
-        Day3 // Day3=2
+    enum AttendanceDay {
+        Null,
+        Day1,
+        Day2,
+        Day3
     }
 
     function appStorage() internal pure returns (AppStorage storage s) {

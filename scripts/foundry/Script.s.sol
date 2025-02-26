@@ -9,6 +9,8 @@ import {DiamondCutFacet} from "../../contracts/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../../contracts/facets/DiamondLoupeFacet.sol";
 import {AccessControlFacet} from "../../contracts/facets/AccessControlFacet.sol";
 import {W3LC2024Facet} from "../../contracts/facets/W3LC2024Facet.sol";
+import {AW3C2024Facet} from "../../contracts/facets/AW3C2024Facet.sol";
+import {BDRLS2024Facet} from "../../contracts/facets/BDRLS2024Facet.sol";
 
 import {IDiamondCut, FacetCut, FacetCutAction} from "../../contracts/interfaces/IDiamondCut.sol";
 import {IDiamondInit} from "../../contracts/interfaces/IDiamondInit.sol";
@@ -21,7 +23,9 @@ import {IERC165} from "../../contracts/interfaces/IERC165.sol";
 import {LibDiamond, DiamondArgs} from "../../contracts/libraries/LibDiamond.sol";
 
 import {HostIT} from "../../contracts/HostIT.sol";
-import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
+import {W3LC2024} from "contracts/nfts/W3LC2024.sol";
+import {AW3C2024} from "contracts/nfts/AW3C2024.sol";
+import {BDRLS2024} from "contracts/nfts/BDRLS2024.sol";
 
 contract DeployHostIT is Script {
     DiamondInit diamondInit;
@@ -31,12 +35,16 @@ contract DeployHostIT is Script {
     W3LC2024Facet w3lc2024Facet;
     HostIT diamond;
 
+    AW3C2024Facet aw3c2024Facet;
+    AW3C2024 aw3c2024NFT;
+
     address constant backendAddr = 0xc408235a9A01767d70B41C98d92F2dC7B0d959f4;
-    address constant w3lcNFT = 0xFE907A3Eb44782A5f96AAf345ed48877bCC080e7;
+    address constant w3lcNFT = 0x8f0F53c9b6aCC81c9b0020Ac3E15E6E306Beb295;
     // roles
     bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 constant DIAMOND_ADMIN_ROLE = keccak256("DIAMOND_ADMIN_ROLE");
     bytes32 constant W3LC3_ADMIN_ROLE = keccak256("W3LC3_ADMIN_ROLE");
+    bytes32 constant AW3C_ADMIN_ROLE = keccak256("AW3C_ADMIN_ROLE");
 
     
     function setSetW3LC2024NFT() internal {
@@ -134,13 +142,68 @@ contract DeployHostIT is Script {
 
         vm.stopBroadcast();
     }
+
+    function setSetAW3C2024NFT(address d_diamond) internal {
+        // Set AW3C2024 NFT
+        AW3C2024Facet(address(d_diamond)).setAW3C2024NFT(w3lcNFT);
+    }
+
+    function grantDiamondAW3CAdminRole() internal {
+        // Grant diamond AW3C2024 NFT admin role
+        AW3C2024(aw3c2024NFT).grantRole(DEFAULT_ADMIN_ROLE, address(diamond));
+    }
+
+    function grantBackendAW3CAdminRole(address d_diamond) internal {
+        // Grant backend AW3C2024 NFT admin role
+        IAccessControl(address(aw3c2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 NFT admin role
+        IAccessControl(address(aw3c2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // Grant backend AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(AW3C_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(AW3C_ADMIN_ROLE, msg.sender);
+    }
+    
+    function addAW3CFacet() external {
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address hostItAddress = vm.envAddress("HOST_IT_ADDRESS");
+        // vm.startBroadcast(privateKey);
+        vm.startBroadcast();
+
+        aw3c2024NFT = new AW3C2024();
+        aw3c2024Facet = new AW3C2024Facet();
+
+        FacetCut[] memory cuts = new FacetCut[](1);
+
+        bytes4[] memory addAw3c2024Selectors = new bytes4[](4);
+        addAw3c2024Selectors[0] = AW3C2024Facet.setAW3C2024NFT.selector;
+        addAw3c2024Selectors[1] = AW3C2024Facet.aw3c2024__markAttendance.selector;
+        addAw3c2024Selectors[2] = AW3C2024Facet.aw3c2024__verifyAttendance.selector;
+        addAw3c2024Selectors[3] = AW3C2024Facet.aw3c2024__returnAttendance.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(aw3c2024Facet), action: FacetCutAction.Add, functionSelectors: addAw3c2024Selectors});
+
+        IDiamondCut(hostItAddress).diamondCut(cuts, address(0), "");
+
+        grantDiamondAW3CAdminRole();
+
+        grantBackendAW3CAdminRole(hostItAddress);
+
+        setSetAW3C2024NFT(hostItAddress);
+
+        vm.stopBroadcast();
+    }
 }
 
 contract UpdateW3LC2024Facet is Script {
     function run() external {
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        // uint256 hostItAddress = vm.envUint("HOST_IT_ADDRESS");
-        vm.startBroadcast(privateKey);
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address hostItAddress = vm.envAddress("HOST_IT_ADDRESS");
+        // vm.startBroadcast(privateKey);
+        vm.startBroadcast();
 
         W3LC2024Facet w3lc2024Facet = new W3LC2024Facet();
 
@@ -162,7 +225,7 @@ contract UpdateW3LC2024Facet is Script {
         cuts[0] = FacetCut({facetAddress: address(0), action: FacetCutAction.Remove, functionSelectors: removeW3lc2024Selectors});
         cuts[1] = FacetCut({facetAddress: address(w3lc2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
 
-        IDiamondCut(address(0x734328C180Ef236a6CB7737132Fe2B6a96201592)).diamondCut(cuts, address(0), "");
+        IDiamondCut(hostItAddress).diamondCut(cuts, address(0), "");
 
         vm.stopBroadcast();
     }
@@ -235,6 +298,217 @@ contract SetW3LC2024 is Script {
         vm.startBroadcast(privateKey);
 
         HostIT diamond;
+
+        vm.stopBroadcast();
+    }
+}
+
+contract AddAW3CFacet is Script {
+    AW3C2024Facet aw3c2024Facet;
+    AW3C2024 aw3c2024NFT;
+
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant AW3C_ADMIN_ROLE = keccak256("AW3C_ADMIN_ROLE");
+
+    address constant backendAddr = 0xc408235a9A01767d70B41C98d92F2dC7B0d959f4;
+    address constant hostItAddress = 0xe639110D69ec5b5C4ECa926271fa2f82Ee94A2D3;
+
+    function setSetAW3C2024NFT(address d_diamond) internal {
+        // Set AW3C2024 NFT
+        AW3C2024Facet(address(d_diamond)).setAW3C2024NFT(address(aw3c2024NFT));
+    }
+
+    function grantDiamondAW3CAdminRole(address d_diamond) internal {
+        // Grant diamond AW3C2024 NFT admin role
+        AW3C2024(aw3c2024NFT).grantRole(DEFAULT_ADMIN_ROLE, address(d_diamond));
+    }
+
+    function grantBackendAW3CAdminRole(address d_diamond) internal {
+        // Grant backend AW3C2024 NFT admin role
+        IAccessControl(address(aw3c2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 NFT admin role
+        IAccessControl(address(aw3c2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // Grant backend AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(AW3C_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(AW3C_ADMIN_ROLE, msg.sender);
+    }
+
+    function run() external {
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // vm.startBroadcast(privateKey);
+        vm.startBroadcast();
+
+        aw3c2024Facet = new AW3C2024Facet();
+        aw3c2024NFT = new AW3C2024();
+        // 0x6CFEc75C163d2c37ef1ee26005D7c018c42844DD Mainnet: 0x95486422705a7F8F6cD35aBc1c4CE5c11e150AdD
+
+        FacetCut[] memory cuts = new FacetCut[](1);
+
+        bytes4[] memory addW3lc2024Selectors = new bytes4[](4);
+        addW3lc2024Selectors[0] = AW3C2024Facet.setAW3C2024NFT.selector;
+        addW3lc2024Selectors[1] = AW3C2024Facet.aw3c2024__markAttendance.selector;
+        addW3lc2024Selectors[2] = AW3C2024Facet.aw3c2024__verifyAttendance.selector;
+        addW3lc2024Selectors[3] = AW3C2024Facet.aw3c2024__returnAttendance.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(aw3c2024Facet), action: FacetCutAction.Add, functionSelectors: addW3lc2024Selectors});
+
+        IDiamondCut(hostItAddress).diamondCut(cuts, address(0), "");
+
+        AW3C2024(aw3c2024NFT).initialize(msg.sender);
+
+        AW3C2024(aw3c2024NFT).setBaseURI("ipfs://QmS8XSfzc5ajyVwrxBgnyBHKw1349ixRGoDPNpXFvspNJV");
+
+        grantDiamondAW3CAdminRole(hostItAddress);
+
+        grantBackendAW3CAdminRole(hostItAddress);
+
+        setSetAW3C2024NFT(hostItAddress);
+
+        vm.stopBroadcast();
+    }
+}
+
+contract AddBDRLSFacet is Script {
+    BDRLS2024Facet bdrls2024Facet;
+    BDRLS2024 bdrls2024NFT;
+
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant BDRLS_ADMIN_ROLE = keccak256("BDRLS_ADMIN_ROLE");
+
+    address constant backendAddr = 0xc408235a9A01767d70B41C98d92F2dC7B0d959f4;
+    address constant hostItAddress = 0xe639110D69ec5b5C4ECa926271fa2f82Ee94A2D3;
+
+    function setSetAW3C2024NFT(address d_diamond) internal {
+        // Set BDRLS2024 NFT
+        BDRLS2024Facet(address(d_diamond)).setBDRLS2024NFT(address(bdrls2024NFT));
+    }
+
+    function grantDiamondAW3CAdminRole(address d_diamond) internal {
+        // Grant diamond BDRLS2024 NFT admin role
+        BDRLS2024(bdrls2024NFT).grantRole(DEFAULT_ADMIN_ROLE, address(d_diamond));
+    }
+
+    function grantBackendAW3CAdminRole(address d_diamond) internal {
+        // Grant backend AW3C2024 NFT admin role
+        IAccessControl(address(bdrls2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 NFT admin role
+        IAccessControl(address(bdrls2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // Grant backend AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(BDRLS_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(BDRLS_ADMIN_ROLE, msg.sender);
+    }
+
+    function run() external {
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // vm.startBroadcast(privateKey);
+        vm.startBroadcast();
+
+        bdrls2024Facet = new BDRLS2024Facet();
+        bdrls2024NFT = new BDRLS2024();
+        // 0xBC8bD8fc78C6FF84cd80359E04Df13e5eA0f89d1 Mainnet: 0x18eBFCa1075285708F911818655d22C21572D433
+
+        FacetCut[] memory cuts = new FacetCut[](1);
+
+        bytes4[] memory addBdrls2024Selectors = new bytes4[](7);
+        addBdrls2024Selectors[0] = BDRLS2024Facet.setBDRLS2024NFT.selector;
+        addBdrls2024Selectors[1] = BDRLS2024Facet.bdrls2024__setDayActive.selector;
+        addBdrls2024Selectors[2] = BDRLS2024Facet.bdrls2024__setDayInactive.selector;
+        addBdrls2024Selectors[3] = BDRLS2024Facet.bdrls2024__markAttendance.selector;
+        addBdrls2024Selectors[4] = BDRLS2024Facet.bdrls2024__verifyAttendance.selector;
+        addBdrls2024Selectors[5] = BDRLS2024Facet.bdrls2024__returnAttendance.selector;
+        addBdrls2024Selectors[6] = BDRLS2024Facet.bdrls2024__isDayActive.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(bdrls2024Facet), action: FacetCutAction.Add, functionSelectors: addBdrls2024Selectors});
+
+        IDiamondCut(hostItAddress).diamondCut(cuts, address(0), "");
+
+        BDRLS2024(bdrls2024NFT).initialize(msg.sender);
+
+        BDRLS2024(bdrls2024NFT).setBaseURI("ipfs://QmZm5ZFrYCaLsqjccShtPjq4DuEyvmm6qgu2W9NFs9giw1");
+
+        grantDiamondAW3CAdminRole(hostItAddress);
+
+        grantBackendAW3CAdminRole(hostItAddress);
+
+        setSetAW3C2024NFT(hostItAddress);
+
+        vm.stopBroadcast();
+    }
+}
+
+contract RemoveW3LC2024Facet is Script {
+    BDRLS2024Facet bdrls2024Facet;
+    BDRLS2024 bdrls2024NFT;
+
+    bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 constant BDRLS_ADMIN_ROLE = keccak256("BDRLS_ADMIN_ROLE");
+
+    address constant backendAddr = 0xc408235a9A01767d70B41C98d92F2dC7B0d959f4;
+    address constant hostItAddress = 0xfa8c40CF7EAC88A9da6D002C44C284BE844B020c;
+
+    function setSetAW3C2024NFT(address d_diamond) internal {
+        // Set BDRLS2024 NFT
+        BDRLS2024Facet(address(d_diamond)).setBDRLS2024NFT(address(bdrls2024NFT));
+    }
+
+    function grantDiamondAW3CAdminRole(address d_diamond) internal {
+        // Grant diamond BDRLS2024 NFT admin role
+        BDRLS2024(bdrls2024NFT).grantRole(DEFAULT_ADMIN_ROLE, address(d_diamond));
+    }
+
+    function grantBackendAW3CAdminRole(address d_diamond) internal {
+        // Grant backend AW3C2024 NFT admin role
+        IAccessControl(address(bdrls2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 NFT admin role
+        IAccessControl(address(bdrls2024NFT)).grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // Grant backend AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(BDRLS_ADMIN_ROLE, backendAddr);
+
+        // Grant deployer AW3C2024 Facet admin role
+        IAccessControl(address(d_diamond)).grantRole(BDRLS_ADMIN_ROLE, msg.sender);
+    }
+
+    function run() external {
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // vm.startBroadcast(privateKey);
+        vm.startBroadcast();
+
+        bdrls2024Facet = new BDRLS2024Facet();
+        bdrls2024NFT = new BDRLS2024();
+        // 0xBC8bD8fc78C6FF84cd80359E04Df13e5eA0f89d1
+
+        FacetCut[] memory cuts = new FacetCut[](1);
+
+        bytes4[] memory addBdrls2024Selectors = new bytes4[](7);
+        addBdrls2024Selectors[0] = BDRLS2024Facet.setBDRLS2024NFT.selector;
+        addBdrls2024Selectors[1] = BDRLS2024Facet.bdrls2024__setDayActive.selector;
+        addBdrls2024Selectors[2] = BDRLS2024Facet.bdrls2024__setDayInactive.selector;
+        addBdrls2024Selectors[3] = BDRLS2024Facet.bdrls2024__markAttendance.selector;
+        addBdrls2024Selectors[4] = BDRLS2024Facet.bdrls2024__verifyAttendance.selector;
+        addBdrls2024Selectors[5] = BDRLS2024Facet.bdrls2024__returnAttendance.selector;
+        addBdrls2024Selectors[6] = BDRLS2024Facet.bdrls2024__isDayActive.selector;
+
+        cuts[0] = FacetCut({facetAddress: address(bdrls2024Facet), action: FacetCutAction.Add, functionSelectors: addBdrls2024Selectors});
+
+        IDiamondCut(hostItAddress).diamondCut(cuts, address(0), "");
+
+        BDRLS2024(bdrls2024NFT).initialize(msg.sender);
+
+        grantDiamondAW3CAdminRole(hostItAddress);
+
+        grantBackendAW3CAdminRole(hostItAddress);
+
+        setSetAW3C2024NFT(hostItAddress);
 
         vm.stopBroadcast();
     }

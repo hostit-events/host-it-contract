@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibApp} from "../libraries/LibApp.sol";
-import {Errors} from "../libraries/constants/Errors.sol";
+import {LibDiamond} from "contracts/libraries/LibDiamond.sol";
+import {LibApp} from "contracts/libraries/LibApp.sol";
+import {Errors} from "contracts/libraries/constants/Errors.sol";
+import {Logs} from "contracts/libraries/constants/Logs.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
-import {W3LC2024} from "contracts/w3lc2024/W3LC2024.sol";
+import {W3LC2024} from "contracts/nfts/W3LC2024.sol";
 
 contract W3LC2024Facet {
     /**
@@ -29,11 +30,11 @@ contract W3LC2024Facet {
      *
      * - msg.sender must have the role `W3LC3_ADMIN_ROLE`.
      */
-    function w3lc2024__setDayActive(LibApp.W3LC2024AttendanceDay day) external {
+    function w3lc2024__setDayActive(LibApp.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        s.isDayActive[day] = true;
+        s.w3lc2024_isDayActive[day] = true;
     }
 
     /**
@@ -43,11 +44,11 @@ contract W3LC2024Facet {
      *
      * - msg.sender must have the role `W3LC3_ADMIN_ROLE`.
      */
-    function w3lc2024__setDayInactive(LibApp.W3LC2024AttendanceDay day) external {
+    function w3lc2024__setDayInactive(LibApp.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        s.isDayActive[day] = false;
+        s.w3lc2024_isDayActive[day] = false;
     }
 
     /**
@@ -64,29 +65,29 @@ contract W3LC2024Facet {
      *
      * Emits an {AttendedW3LC2024} event.
      */
-    function w3lc2024__markAttendance(address attendee, LibApp.W3LC2024AttendanceDay day) external {
+    function w3lc2024__markAttendance(address attendee, LibApp.AttendanceDay day) external {
         LibDiamond._checkRole(LibDiamond.W3LC3_ADMIN_ROLE);
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        if (s.isDayActive[day] == false) revert Errors.W3LC2024__DayNotActive();
+        if (s.w3lc2024_isDayActive[day] == false) revert Errors.W3LC2024__DayNotActive(uint8(day));
 
-        if (s.attended[attendee][day] == true) revert Errors.W3LC2024__AlreadyAttended();
+        if (s.w3lc2024_attended[attendee][day] == true) revert Errors.W3LC2024__AlreadyAttended(uint8(day));
 
         if (IERC721AUpgradeable(s.W3LC2024NFT).balanceOf(attendee) == 0) W3LC2024(s.W3LC2024NFT).mintSingle(attendee);
 
-        if (day == LibApp.W3LC2024AttendanceDay.Day1) {
-            s.day1Attendees.push(attendee);
-        } else if (day == LibApp.W3LC2024AttendanceDay.Day2) {
-            s.day2Attendees.push(attendee);
-        } else if (day == LibApp.W3LC2024AttendanceDay.Day3) {
-            s.day3Attendees.push(attendee);
+        if (day == LibApp.AttendanceDay.Day1) {
+            s.w3lc2024_day1Attendees.push(attendee);
+        } else if (day == LibApp.AttendanceDay.Day2) {
+            s.w3lc2024_day2Attendees.push(attendee);
+        } else if (day == LibApp.AttendanceDay.Day3) {
+            s.w3lc2024_day3Attendees.push(attendee);
         } else {
-            revert Errors.W3LC2024__InvalidDay();
+            revert Errors.W3LC2024__InvalidDay(uint8(day));
         }
 
-        s.attended[attendee][day] = true;
+        s.w3lc2024_attended[attendee][day] = true;
 
-        emit LibApp.AttendedW3LC2024(attendee, day, block.timestamp);
+        emit Logs.AttendedW3LC2024(attendee, day, block.timestamp);
     }
 
     /**
@@ -96,31 +97,31 @@ contract W3LC2024Facet {
      *
      * - `msg.sender` must have the role `W3LC3_ADMIN_ROLE`.
      */
-    function w3lc2024__verifyAttendance(address attendee, LibApp.W3LC2024AttendanceDay day) public view returns (bool) {
+    function w3lc2024__verifyAttendance(address attendee, LibApp.AttendanceDay day) public view returns (bool) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        return s.attended[attendee][day];
+        return s.w3lc2024_attended[attendee][day];
     }
 
     /**
-     * @dev Returns array of marked `attendee` for all the `day`.
+     * @dev Returns array of marked `attendee`s for all the `day`s.
      *
      */
     function w3lc2024__returnAttendance() external view returns (address[] memory day1, address[] memory day2, address[] memory day3) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        day1 = s.day1Attendees;
-        day2 = s.day2Attendees;
-        day3 = s.day3Attendees;
+        day1 = s.w3lc2024_day1Attendees;
+        day2 = s.w3lc2024_day2Attendees;
+        day3 = s.w3lc2024_day3Attendees;
     }
 
     /**
      * @dev Returns if day is active.
      *
      */
-    function w3lc2024__isDayActive(LibApp.W3LC2024AttendanceDay day) external view returns (bool) {
+    function w3lc2024__isDayActive(LibApp.AttendanceDay day) external view returns (bool) {
         LibApp.AppStorage storage s = LibApp.appStorage();
 
-        return s.isDayActive[day];
+        return s.w3lc2024_isDayActive[day];
     }
 }
