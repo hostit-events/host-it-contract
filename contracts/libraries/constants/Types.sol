@@ -2,43 +2,31 @@
 pragma solidity ^0.8.0;
 
 library Types {
-    struct EventData {
-        address organizer;
-        address eventNFT;
-        uint8 duration; // in days 
-        uint256 id;
-        uint256 createdAt;
-        uint256 updatedAt;
-        uint256 registrationStart;
-        uint256 registrationEnd;
-        uint256 startDate;
-        uint256 endDate;
-        uint256 attendeeLimit;
-        uint256 registrationFee;
-        PayFeeIn payFeeIn;
-        // mapping(PayFeeIn => uint256) registrationFee3;
-    }
-
-    enum PayFeeIn {
-        ETH,
-        USDT
-    }
-
     enum AttendanceDay {
         Null,
         Day1,
         Day2,
         Day3
     }
+}
 
-    // struct EventMetadata {
-    //     bool isPaid;
-    //     EventType eventType;
-    //     uint256 startDate;
-    //     uint256 endDate;
-    //     string location;
-    //     string image;
-    // }
+struct EventData {
+    uint256 id;
+    address organizer;
+    address ticketAddress;
+    bool freeEvent;
+    uint256 createdAt;
+    uint256 updatedAt;
+    uint256 startTime;
+    uint256 endTime;
+    uint256 totalTickets;
+}
+
+enum PayFeeIn {
+    ETH,
+    LSK,
+    USDT,
+    USDCe
 }
 
 // TODO
