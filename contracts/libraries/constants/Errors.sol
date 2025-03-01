@@ -85,4 +85,5 @@ library Errors {
     error Event__AlreadyAttendedDay(uint256, uint8);
     error Event__InvalidPaymentMethod();
     error Event__AddressZeroOrganizer();
+    error Event__FreeEventNoFee();
 }
