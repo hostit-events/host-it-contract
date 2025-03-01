@@ -10,6 +10,7 @@ library Logs {
     // =============================================================
     event EventCreated(uint256 indexed eventId, EventData eventData);
     event EventUpdated(uint256 indexed eventId, EventData eventData);
+    event EventFeeSet(uint256 indexed eventId, PayFeeIn payFeeIn, uint256 fee);
     event AttendeeRegistered(uint256 indexed eventId, address attendee);
     event AttendeeCheckedIn(uint256 indexed eventId, address attendee);
 
