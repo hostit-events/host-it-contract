@@ -113,8 +113,12 @@ contract EventFactoryFacet is IEventFactory, ReentrancyGuard {
     function _setEventFee(uint256 _eventId, PayFeeIn _payFeeIn, uint256 _fee) internal {
         LibEvent.EventStorage storage es = LibEvent.eventStorage();
 
+        if (es.eventById[_eventId].freeEvent) revert Errors.Event__FreeEventNoFee();
+
         es.payEventFeeIn[_eventId][_payFeeIn] = true;
         es.eventTicketPrice[_eventId][_payFeeIn] = _fee;
+
+        emit Logs.EventFeeSet(_eventId, _payFeeIn, _fee);
     }
 
     /**
@@ -137,7 +141,8 @@ contract EventFactoryFacet is IEventFactory, ReentrancyGuard {
         string calldata _uri,
         uint256 _startTime,
         uint256 _endTime,
-        uint256 _totalTickets
+        uint256 _totalTickets,
+        bool _freeEvent
     ) external nonReentrant returns (address) {
         bytes32 eventHash = keccak256(abi.encode(HOST_IT_EVENT, _eventId));
         LibDiamond._checkRole(eventHash);
@@ -154,6 +159,7 @@ contract EventFactoryFacet is IEventFactory, ReentrancyGuard {
         eventData.startTime = _startTime;
         eventData.endTime = _endTime;
         eventData.totalTickets = _totalTickets;
+        eventData.freeEvent = _freeEvent;
         eventData.updatedAt = block.timestamp;
 
         emit Logs.EventUpdated(_eventId, eventData);
